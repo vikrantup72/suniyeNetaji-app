@@ -1,0 +1,201 @@
+import {StyleSheet} from 'react-native';
+import {RfH, RfW} from '../../utils/helper';
+import {colors} from '../../utils';
+
+export default styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.WHITE,
+  },
+  homecontainer: {},
+  imgcontainer: {
+    backgroundColor: colors.GRAY,
+    height: RfH(32),
+    width: RfW(32),
+    borderRadius: RfH(16),
+    justifyContent: 'center',
+  },
+  postcontainer: {
+    flexDirection: 'row',
+  },
+  modalContainer: {
+    backgroundColor: 'white',
+    width: RfW(150), // Adjust as needed
+    height: RfH(50), // Adjust as needed
+    borderRadius: 10,
+    bottom: RfH(55),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  namesty: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.black,
+    paddingHorizontal: RfW(10),
+    lineHeight: RfH(17),
+    fontFamily: 'Poppins-Medium',
+    // width:'80%'
+  },
+  timesty: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: colors.DARK_GRAY,
+    paddingHorizontal: RfW(10),
+    lineHeight: RfH(14),
+    fontFamily: 'Poppins-Medium',
+  },
+  followcontainer: {flexDirection: 'row'},
+  followBtn: {
+    width: RfW(77),
+    height: RfH(25),
+    // borderWidth: 1,
+    borderColor: colors.black,
+    borderRadius: RfH(7),
+    justifyContent: 'center',
+    marginHorizontal: RfW(20),
+    marginTop: RfH(2),
+    left: RfW(20),
+  },
+  followedBtn: {
+    backgroundColor: colors.skyblue,
+    borderColor: '#7966FF',
+  },
+  followtxt: {
+    alignSelf: 'center',
+    fontSize: 13,
+    fontWeight: '400',
+    lineHeight: 16,
+    color: colors.black,
+    fontFamily: 'Poppins-Regular',
+    top: RfH(1),
+  },
+  msgtextsty: {
+    marginTop: RfH(10),
+    fontSize: 12,
+    fontWeight: '400',
+    lineHeight: 16,
+    color: colors.black,
+    fontFamily: 'Poppins-Regular',
+    left: RfW(2),
+  },
+  videoPlayer: {
+    borderRadius: RfH(20),
+    backgroundColor: colors.WHITE,
+    borderWidth: 1,
+    borderColor: '#F3F3F3',
+  },
+  videoContainer: {
+    width: RfW(320),
+    alignSelf: 'center',
+    marginTop: RfH(15),
+    // right: RfW(3),
+    borderColor: '#F3F3F3',
+    paddingVertical: RfH(3),
+  },
+  massagepostcontainer: {
+    borderWidth: 1,
+    padding: RfH(10),
+    borderRadius: RfH(7),
+    borderColor: colors.LIGHT_BLACK,
+    marginVertical: RfH(8),
+    width: RfW(337),
+    alignSelf: 'center',
+  },
+  othercontainer: {flexDirection: 'row'},
+  postimgsty: {
+    width: '100%',
+    height: '100%',
+    borderRadius: RfH(8),
+    marginVertical: RfH(10),
+    alignSelf: 'center',
+    resizeMode: 'contain',
+  },
+
+  // Video hbhabha
+  tabVideo: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    backgroundColor: colors.shadwo_blue,
+    borderRadius: RfH(8),
+    marginVertical: RfH(10),
+    padding: RfH(8),
+  },
+  playButton: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    width: RfW(50),
+    height: RfH(50),
+    borderRadius: 25,
+  },
+  clearButton: {},
+  video: {},
+  centeredView: {
+    width: RfW(280),
+    height: RfH(120),
+    borderRadius: RfH(10),
+    alignSelf: 'center',
+    justifyContent: 'center',
+    marginTop: '90%',
+    backgroundColor: colors.WHITE,
+    borderColor: colors.GRAY,
+    borderWidth: 1,
+  },
+  button: {
+    paddingHorizontal: RfW(10),
+    paddingVertical: RfH(5),
+    borderRadius: RfH(4),
+    marginTop: RfH(10),
+    borderWidth: 1,
+    borderColor: colors.GRAY,
+  },
+  textStyle: {
+    color: colors.WHITE,
+    fontFamily: 'Poppins-Regular',
+  },
+  modalText: {
+    color: colors.black,
+    fontFamily: 'Poppins-Regular',
+    fontSize: 15,
+    alignSelf: 'center',
+  },
+  bottombtncon: {
+    flexDirection: 'row',
+    backgroundColor: colors.shadwo_blue,
+    borderRadius: 10,
+    paddingHorizontal: RfW(10),
+    paddingVertical: RfH(10),
+  },
+  btntxt: {
+    fontSize: 14,
+    color: colors.black,
+    fontFamily: 'Poppins-Medium',
+    top: RfH(2),
+  },
+  disbtntxt: {
+    fontSize: 11,
+    fontFamily: 'Poppins-Regular',
+    color: colors.DARK_GRAY,
+    bottom: RfH(0),
+  },
+  loadersty: {
+    flex: 1,
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  dullBackground: {
+    // opacity: 0.5,
+  },
+  activityIndicatorContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // backgroundColor: 'rgba(0,0,0,0.5)'
+  },
+});
