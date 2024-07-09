@@ -1,16 +1,15 @@
 import * as React from 'react';
-import {Provider, useDispatch} from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import store from './src/redux/store';
 import RootNavigation from './src/Navigation/RootNavigation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {setToken} from './src/redux/ProfileSlice';
+import { setToken } from './src/redux/ProfileSlice';
 import CheckInternet from './src/utils/CheckInternet';
 
 function App() {
   const [authKey, setAuthKey] = React.useState(null);
-  const [isconnected, setIsconnected] = React.useState(false);
+  const [isconnected, setIsconnected] = React.useState(true);
 
-  console.log(authKey, 'authKeybbb');
   React.useEffect(() => {
     const getAuthKey = async () => {
       try {
