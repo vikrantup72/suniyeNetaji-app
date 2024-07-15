@@ -20,22 +20,23 @@ import {fetchData} from '../../redux/PostReducer';
 import {RequestCount, fetchnearbyData} from '../../redux/SocialReducer';
 import {RfH, RfW} from '../../utils/helper';
 
-const Home = ({route}) => {
-  const profile_id = route.params;
+const Home = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
   const datas = [
     {key: 'banner', component: <BannerScreen />},
     {key: 'bestPolitician', component: <BestPolitician />},
     {key: 'post', component: <Post />},
   ];
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const renderItem = useCallback(
     ({item}) => <View style={styles.item}>{item.component}</View>,
     [],
   );
+
+  const keyExtractor = useCallback((item) => item.key, []);
+
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -100,7 +101,7 @@ const Home = ({route}) => {
           legacyImplementation={true}
           data={datas}
           renderItem={renderItem}
-          keyExtractor={item => item.key}
+          keyExtractor={keyExtractor}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl

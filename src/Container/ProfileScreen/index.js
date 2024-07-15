@@ -269,7 +269,7 @@ const Profile = ({route}) => {
                     },
                   ]}
                   resizeMode="cover"
-                  onEnd={() => {}}
+                  repeat={true}
                 />
                 <TouchableOpacity
                   activeOpacity={0.9}
