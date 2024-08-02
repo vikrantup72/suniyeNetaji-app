@@ -29,6 +29,13 @@ import Feather from "react-native-vector-icons/Feather";
 import { BottomSheet } from "react-native-btr";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RNFetchBlob from "rn-fetch-blob";
+// import {
+// 	BannerAd,
+// 	BannerAdSize,
+// 	TestIds,
+// } from "react-native-google-mobile-ads";
+import BestPolitician from "../BestPolitician";
+import BannerScreen from "../Banner";
 
 const Post = () => {
 	const [currentVideoIndex, setCurrentVideoIndex] = useState(null);
@@ -189,11 +196,13 @@ const Post = () => {
 	};
 
 	const downloadFile = async (url, fileName) => {
-		const hasPermission = await requestDownloadPermission();
-		if (!hasPermission) {
-			Alert.alert("Permission Denied", "No storage permission granted");
-			console.error("No storage permission granted");
-			return;
+		if (!Platform.Version > 30) {
+			const hasPermission = await requestDownloadPermission();
+			if (!hasPermission) {
+				Alert.alert("Permission Denied", "No storage permission granted");
+				console.error("No storage permission granted");
+				return;
+			}
 		}
 
 		const { config, fs } = RNFetchBlob;
@@ -247,6 +256,15 @@ const Post = () => {
 		setBottomSheetVisible(false);
 	};
 
+	const renderHeaderComponent = useCallback(() => {
+		return (
+			<>
+				<BannerScreen />
+				<BestPolitician />
+			</>
+		);
+	}, [HomeDashboardData]);
+
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
 			<FlatList
@@ -256,6 +274,7 @@ const Post = () => {
 					minimumViewTime: 1000,
 				}}
 				removeClippedSubviews={true}
+				ListHeaderComponent={renderHeaderComponent}
 				legacyImplementation={true}
 				data={HomeDashboardData}
 				keyExtractor={(item) => item.toString()}
@@ -266,9 +285,36 @@ const Post = () => {
 						colors={[colors.skyblue]}
 					/>
 				}
-				renderItem={({ item }) => {
+				renderItem={({ item, index }) => {
+					// if ((index + 1) % 7 === 0) {
+					// 	return (
+					// 		<View
+					// 			style={{
+					// 				backgroundColor: "#fff",
+					// 				padding: 12,
+					// 				marginHorizontal: 20,
+					// 				borderRadius: 6,
+					// 				borderWidth: 1,
+					// 				borderColor: "#ddd",
+					// 				height: 300,
+					// 				alignItems: "center",
+					// 				marginBottom: 10,
+					// 			}}
+					// 		>
+					// 			<BannerAd
+					// 				size={BannerAdSize.MEDIUM_RECTANGLE}
+					// 				unitId={"ca-app-pub-8153576310820784/4730987154"}
+					// 				onAdLoaded={() => {
+					// 					console.log("Advert loaded");
+					// 				}}
+					// 				onAdFailedToLoad={(error) => {
+					// 					console.error("Advert failed to load: ", error);
+					// 				}}
+					// 			/>
+					// 		</View>
+					// 	);
+					// }
 					const data = mainDataSource[item];
-					const imageSize = imageSizes[data?.id];
 					return (
 						<View>
 							<View style={styles.massagepostcontainer}>
@@ -357,21 +403,20 @@ const Post = () => {
 											alignItems: "center",
 											marginVertical: RfH(5),
 											overflow: "hidden",
-											height: imageSize?.height || RfH(300),
+											height: RfH(300),
 											width: screenWidth - RfH(62),
 										}}
-										onLayout={onLayout(data?.id)}
 									>
 										<Image
 											source={{
 												uri: data.banner_image,
 												cache: "force-cache",
 											}}
+											resizeMode="contain"
 											style={[
 												{
 													width: "100%",
 													height: "100%",
-													resizeMode: "cover",
 													backgroundColor: colors.LIGHT_GRAY,
 													marginTop: hp("0.1%"),
 													borderRadius: RfH(10),

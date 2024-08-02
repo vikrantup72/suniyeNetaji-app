@@ -1,39 +1,40 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {View, Image, TouchableOpacity, StyleSheet, Text} from 'react-native';
-import {colors} from '../../utils';
+import React, { useState, useCallback } from 'react';
+import { View, Image, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { colors } from '../../utils';
 import Share from 'react-native-share';
-import {RfH, RfW, getKey} from '../../utils/helper';
-import {useNavigation} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
-import {dislikePost, likePost} from '../../redux/DataSource';
+import { RfH, RfW, getKey } from '../../utils/helper';
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { dislikePost, likePost } from '../../redux/DataSource';
 
-const SocialActivityes = ({Commentimg, item}) => {
+const SocialActivities = ({ Commentimg, item }) => {
   const [likeCount, setLikeCount] = useState(item?.total_likes_count || 0);
   const [isLiked, setIsLiked] = useState(item?.is_like);
-
-  const [totalShareCount, setTotalShareCount] = useState(
-    item?.total_share_count || 0,
-  );
+  const [totalShareCount, setTotalShareCount] = useState(item?.total_share_count || 0);
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
   const handlePostLike = useCallback(id => {
-    dispatch(likePost({id: id}));
-  }, []);
+    dispatch(likePost({ id: id }));
+  }, [dispatch]);
 
   const handlePostDislike = useCallback(id => {
-    dispatch(dislikePost({id: id}));
-  }, []);
+    dispatch(dislikePost({ id: id }));
+  }, [dispatch]);
 
   const handleLike = async id => {
     try {
-      setIsLiked(!isLiked);
-      if (!isLiked) {
+      const newIsLiked = !isLiked;
+      setIsLiked(newIsLiked);
+      setLikeCount(prevCount => newIsLiked ? prevCount + 1 : prevCount - 1);
+
+      if (newIsLiked) {
         handlePostLike(id);
       } else {
         handlePostDislike(id);
       }
-      const action = !isLiked ? 'like' : 'dislike';
+
+      const action = newIsLiked ? 'like' : 'dislike';
       const token = await getKey('AuthKey');
       console.log('Token:', token);
       const response = await fetch(
@@ -45,12 +46,11 @@ const SocialActivityes = ({Commentimg, item}) => {
             'Content-Type': 'application/json',
             Authorization: `Token ${token}`,
           },
-          body: JSON.stringify({action}),
+          body: JSON.stringify({ action }),
         },
       );
-      if (response.ok) {
-        console.log(`Post ${!isLiked ? 'liked' : 'disliked'} successfully`);
-      } else {
+
+      if (!response.ok) {
         console.error('Error liking post:', response.status);
       }
     } catch (error) {
@@ -95,7 +95,7 @@ const SocialActivityes = ({Commentimg, item}) => {
       {likeCount > 0 && (
         <TouchableOpacity
           style={styles.likeCountcon}
-          onPress={() => navigation.navigate('likeList', {item})}>
+          onPress={() => navigation.navigate('likeList', { item })}>
           <View>
             <Image
               source={require('../../assets/images/reaction.png')}
@@ -107,9 +107,9 @@ const SocialActivityes = ({Commentimg, item}) => {
               }}
             />
           </View>
-          {item?.total_likes_count > 0 && (
-            <View style={{paddingHorizontal: RfW(5), bottom: RfH(7)}}>
-              <Text style={styles.likecountsty}>{item?.total_likes_count}</Text>
+          {likeCount > 0 && (
+            <View style={{ paddingHorizontal: RfW(5), bottom: RfH(7) }}>
+              <Text style={styles.likecountsty}>{likeCount}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -122,7 +122,7 @@ const SocialActivityes = ({Commentimg, item}) => {
             styles.reactioncontainer,
             {
               flexDirection: 'row',
-              backgroundColor: item?.is_like
+              backgroundColor: isLiked
                 ? colors.shadwo_red
                 : colors.shadwo_blue,
             },
@@ -130,7 +130,7 @@ const SocialActivityes = ({Commentimg, item}) => {
           <View>
             <Image
               source={require('../../assets/images/thumb.png')}
-              tintColor={item?.is_like ? 'red' : colors.black}
+              tintColor={isLiked ? 'red' : colors.black}
               style={styles.likeimgsty}
             />
           </View>
@@ -142,15 +142,15 @@ const SocialActivityes = ({Commentimg, item}) => {
               discription: item,
             })
           }
-          style={[styles.reactioncontainer, {flexDirection: 'row'}]}>
+          style={[styles.reactioncontainer, { flexDirection: 'row' }]}>
           <View>
             <Image
               source={Commentimg}
-              style={[styles.likeimgsty, {marginLeft: 5}]}
+              style={[styles.likeimgsty, { marginLeft: 5 }]}
             />
           </View>
           {item?.total_comments ? (
-            <View style={{paddingHorizontal: RfW(5)}}>
+            <View style={{ paddingHorizontal: RfW(5) }}>
               <Text style={styles.likecountsty}>{item?.total_comments}</Text>
             </View>
           ) : null}
@@ -166,7 +166,7 @@ const SocialActivityes = ({Commentimg, item}) => {
             <Text
               style={[
                 styles.likecountsty,
-                {paddingHorizontal: RfW(0), left: 5},
+                { paddingHorizontal: RfW(0), left: 5 },
               ]}>
               {totalShareCount}
             </Text>
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: RfW(6),
   },
-  likeimgsty: {height: RfH(21), width: RfW(20), alignSelf: 'center'},
+  likeimgsty: { height: RfH(21), width: RfW(20), alignSelf: 'center' },
   likecontainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -222,4 +222,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SocialActivityes;
+export default SocialActivities;

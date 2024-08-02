@@ -11,10 +11,10 @@
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
+		3F52A7C4FDE2EB0CE9B26F52 /* libPods-suniyenetajee.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F8F2D239529490EF08E58CDC /* libPods-suniyenetajee.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		BB428E55682BF140E81E1C55 /* libPods-suniyenetajee.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A5F331BEB9E4C2DAD10FCC57 /* libPods-suniyenetajee.a */; };
-		F146A573F083F9A864C3BC5C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 73CBDA361361119F69818F90 /* PrivacyInfo.xcprivacy */; };
-		F180A216D5FBDA9734B4EDB6 /* libPods-suniyenetajee-suniyenetajeeTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A7FF474AACC7BCAAFB5957F /* libPods-suniyenetajee-suniyenetajeeTests.a */; };
+		9AB0AA3D754E1D41AE61CBCB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 0D76C28CEC7A9164ADFF632C /* PrivacyInfo.xcprivacy */; };
+		CF35BE249CE9D11524EEBBD9 /* libPods-suniyenetajee-suniyenetajeeTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A7FACB0902421FF056D2FD7F /* libPods-suniyenetajee-suniyenetajeeTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,7 +31,8 @@
 		00E356EE1AD99517003FC87E /* suniyenetajeeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = suniyenetajeeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		00E356F21AD99517003FC87E /* suniyenetajeeTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = suniyenetajeeTests.m; sourceTree = "<group>"; };
-		0E36AFECC45679CB676E443D /* Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig"; path = "Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig"; sourceTree = "<group>"; };
+		06FB810D5536A74C35687472 /* Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig"; path = "Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig"; sourceTree = "<group>"; };
+		0D76C28CEC7A9164ADFF632C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = suniyenetajee/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* suniyenetajee.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = suniyenetajee.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = suniyenetajee/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = suniyenetajee/AppDelegate.mm; sourceTree = "<group>"; };
@@ -39,14 +40,13 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = suniyenetajee/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = suniyenetajee/main.m; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = suniyenetajee/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		72C33CA6BF1E34D6FBB37E28 /* Pods-suniyenetajee.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee.release.xcconfig"; path = "Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee.release.xcconfig"; sourceTree = "<group>"; };
-		73CBDA361361119F69818F90 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = suniyenetajee/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		322130F64479DD5B1247206E /* Pods-suniyenetajee.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee.debug.xcconfig"; path = "Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = suniyenetajee/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		8A7FF474AACC7BCAAFB5957F /* libPods-suniyenetajee-suniyenetajeeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-suniyenetajee-suniyenetajeeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A5F331BEB9E4C2DAD10FCC57 /* libPods-suniyenetajee.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-suniyenetajee.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		C7B08FC6792831C4F51E4E24 /* Pods-suniyenetajee.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee.debug.xcconfig"; path = "Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee.debug.xcconfig"; sourceTree = "<group>"; };
-		E0FBE6FAA47300B51339069F /* Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig"; path = "Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig"; sourceTree = "<group>"; };
+		A7FACB0902421FF056D2FD7F /* libPods-suniyenetajee-suniyenetajeeTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-suniyenetajee-suniyenetajeeTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B323184A769022721E4BDEE1 /* Pods-suniyenetajee.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee.release.xcconfig"; path = "Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee.release.xcconfig"; sourceTree = "<group>"; };
+		CC52DED0B72A4171DB1340F6 /* Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig"; path = "Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F8F2D239529490EF08E58CDC /* libPods-suniyenetajee.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-suniyenetajee.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,7 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F180A216D5FBDA9734B4EDB6 /* libPods-suniyenetajee-suniyenetajeeTests.a in Frameworks */,
+				CF35BE249CE9D11524EEBBD9 /* libPods-suniyenetajee-suniyenetajeeTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,7 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB428E55682BF140E81E1C55 /* libPods-suniyenetajee.a in Frameworks */,
+				3F52A7C4FDE2EB0CE9B26F52 /* libPods-suniyenetajee.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,7 +96,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
-				73CBDA361361119F69818F90 /* PrivacyInfo.xcprivacy */,
+				0D76C28CEC7A9164ADFF632C /* PrivacyInfo.xcprivacy */,
 			);
 			name = suniyenetajee;
 			sourceTree = "<group>";
@@ -105,8 +105,8 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				A5F331BEB9E4C2DAD10FCC57 /* libPods-suniyenetajee.a */,
-				8A7FF474AACC7BCAAFB5957F /* libPods-suniyenetajee-suniyenetajeeTests.a */,
+				F8F2D239529490EF08E58CDC /* libPods-suniyenetajee.a */,
+				A7FACB0902421FF056D2FD7F /* libPods-suniyenetajee-suniyenetajeeTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -145,10 +145,10 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				C7B08FC6792831C4F51E4E24 /* Pods-suniyenetajee.debug.xcconfig */,
-				72C33CA6BF1E34D6FBB37E28 /* Pods-suniyenetajee.release.xcconfig */,
-				0E36AFECC45679CB676E443D /* Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig */,
-				E0FBE6FAA47300B51339069F /* Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig */,
+				322130F64479DD5B1247206E /* Pods-suniyenetajee.debug.xcconfig */,
+				B323184A769022721E4BDEE1 /* Pods-suniyenetajee.release.xcconfig */,
+				06FB810D5536A74C35687472 /* Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig */,
+				CC52DED0B72A4171DB1340F6 /* Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -160,12 +160,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "suniyenetajeeTests" */;
 			buildPhases = (
-				2ABEEB7A377FDFB61EFBED4B /* [CP] Check Pods Manifest.lock */,
+				3D936316C41890EA47FDAF90 /* [CP] Check Pods Manifest.lock */,
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				5998D7D26C41FEF00C748D2B /* [CP] Embed Pods Frameworks */,
-				0FCDA73255E575CFB61FC0DE /* [CP] Copy Pods Resources */,
+				8BFE87C3CB5C871C01DC33A6 /* [CP] Embed Pods Frameworks */,
+				DEC2B241CB2C1C1E19F4DF0E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -181,13 +181,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "suniyenetajee" */;
 			buildPhases = (
-				8A64DE4F1DCD9652F48F98E6 /* [CP] Check Pods Manifest.lock */,
+				1DCB1E0DA0E415204755F420 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				57415D26FEF7D0BEFC94C95A /* [CP] Embed Pods Frameworks */,
-				1087D8C3C0226A6D596EFFDA /* [CP] Copy Pods Resources */,
+				895A6DE7D8D51F4F538759DD /* [CP] Embed Pods Frameworks */,
+				8D65D8BC2E810580D41164A6 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -248,7 +248,7 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				F146A573F083F9A864C3BC5C /* PrivacyInfo.xcprivacy in Resources */,
+				9AB0AA3D754E1D41AE61CBCB /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,41 +271,29 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		0FCDA73255E575CFB61FC0DE /* [CP] Copy Pods Resources */ = {
+		1DCB1E0DA0E415204755F420 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Copy Pods Resources";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-suniyenetajee-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests-resources.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		1087D8C3C0226A6D596EFFDA /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		2ABEEB7A377FDFB61EFBED4B /* [CP] Check Pods Manifest.lock */ = {
+		3D936316C41890EA47FDAF90 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -327,7 +315,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		57415D26FEF7D0BEFC94C95A /* [CP] Embed Pods Frameworks */ = {
+		895A6DE7D8D51F4F538759DD /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -344,7 +332,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		5998D7D26C41FEF00C748D2B /* [CP] Embed Pods Frameworks */ = {
+		8BFE87C3CB5C871C01DC33A6 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -361,26 +349,38 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		8A64DE4F1DCD9652F48F98E6 /* [CP] Check Pods Manifest.lock */ = {
+		8D65D8BC2E810580D41164A6 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
+			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-suniyenetajee-checkManifestLockResult.txt",
+				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee/Pods-suniyenetajee-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DEC2B241CB2C1C1E19F4DF0E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-suniyenetajee-suniyenetajeeTests/Pods-suniyenetajee-suniyenetajeeTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -416,7 +416,7 @@
 /* Begin XCBuildConfiguration section */
 		00E356F61AD99517003FC87E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0E36AFECC45679CB676E443D /* Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig */;
+			baseConfigurationReference = 06FB810D5536A74C35687472 /* Pods-suniyenetajee-suniyenetajeeTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -443,7 +443,7 @@
 		};
 		00E356F71AD99517003FC87E /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E0FBE6FAA47300B51339069F /* Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig */;
+			baseConfigurationReference = CC52DED0B72A4171DB1340F6 /* Pods-suniyenetajee-suniyenetajeeTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
@@ -467,18 +467,13 @@
 		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C7B08FC6792831C4F51E4E24 /* Pods-suniyenetajee.debug.xcconfig */;
+			baseConfigurationReference = 322130F64479DD5B1247206E /* Pods-suniyenetajee.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NKUXUQ7HQW;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = suniyenetajee/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Suniye Netaji";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -489,9 +484,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.indiggcommunity;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = suniyenetajee;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -500,17 +494,12 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 72C33CA6BF1E34D6FBB37E28 /* Pods-suniyenetajee.release.xcconfig */;
+			baseConfigurationReference = B323184A769022721E4BDEE1 /* Pods-suniyenetajee.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = NKUXUQ7HQW;
 				INFOPLIST_FILE = suniyenetajee/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Suniye Netaji";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -521,9 +510,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.indiggcommunity;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = suniyenetajee;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};

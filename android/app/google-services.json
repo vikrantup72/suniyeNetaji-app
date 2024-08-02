@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "143224618557",
+    "project_id": "suniyenetajee-12ebb",
+    "storage_bucket": "suniyenetajee-12ebb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143224618557:android:d009184ec0c256cdadb454",
+        "android_client_info": {
+          "package_name": "com.suniyenetajee"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCloYXpTOZ2E0KGJH5TZEmgY4ZbXWUDMdw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      },
+      "admob_app_id": "ca-app-pub-8153576310820784~5477355942"
+    }
+  ],
+  "configuration_version": "1"
+}

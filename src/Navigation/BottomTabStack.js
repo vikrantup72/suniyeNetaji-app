@@ -82,7 +82,7 @@ function BottomTabStack({ navigation }) {
 							iconStyle = {
 								...iconStyle,
 							};
-						}else if (route.name === "FindFriendsScreen") {
+						} else if (route.name === "FindFriendsScreen") {
 							iconSource = focused
 								? require("../assets/images/selectedsearch.png")
 								: require("../assets/images/search.png");
@@ -159,13 +159,13 @@ function BottomTabStack({ navigation }) {
           }}
         /> */}
 				<Tab.Screen
-          name="FindFriendsScreen"
-          component={FindFriendsScreen}
-          options={{
-            tabBarLabel: '',
-            headerShown: false,
-          }}
-        />
+					name="FindFriendsScreen"
+					component={FindFriendsScreen}
+					options={{
+						tabBarLabel: "",
+						headerShown: false,
+					}}
+				/>
 				<Tab.Screen
 					name="MenuScreen"
 					component={MenuScreen}

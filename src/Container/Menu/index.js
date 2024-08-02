@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   BackHandler,
@@ -12,33 +12,43 @@ import {
   RefreshControl,
   Pressable,
   Modal,
-} from 'react-native';
-import {colors} from '../../utils';
-import {AsyncStorageKey, RfH, RfW, getKey} from '../../utils/helper';
-import Icon from 'react-native-vector-icons/AntDesign';
-import FeatherIcon from 'react-native-vector-icons/Feather';
-import {useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useDispatch} from 'react-redux';
-import {DeleteAccount, setToken} from '../../redux/ProfileSlice';
-import ImageViewing from 'react-native-image-viewing';
+  Switch,
+} from "react-native";
+import { colors } from "../../utils";
+import { AsyncStorageKey, RfH, RfW, getKey } from "../../utils/helper";
+import Icon from "react-native-vector-icons/AntDesign";
+import FeatherIcon from "react-native-vector-icons/Feather";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
+import { DeleteAccount, setToken } from "../../redux/ProfileSlice";
+import ImageViewing from "react-native-image-viewing";
 
 const menuItems = [
-  {id: 1, icon: require('../../assets/images/edit.png'), label: 'Edit'},
-  {id: 2, icon: require('../../assets/images/support.png'), label: 'Support'},
-  {id: 3, icon: require('../../assets/images/offer.png'), label: 'Draft'},
+  { id: 1, icon: require("../../assets/images/edit.png"), label: "Edit" },
+  { id: 2, icon: require("../../assets/images/support.png"), label: "Support" },
+  { id: 3, icon: require("../../assets/images/offer.png"), label: "Draft" },
   {
     id: 5,
-    icon: require('../../assets/images/friend.png'),
-    label: 'Find Friends',
+    icon: require("../../assets/images/friend.png"),
+    label: "Find Friends",
   },
   {
     id: 4,
-    icon: require('../../assets/images/delete.png'),
-    label: 'Delete Account',
+    icon: require("../../assets/images/delete.png"),
+    label: "Delete Account",
   },
-
-  {id: 6, icon: require('../../assets/images/logimages.png'), label: 'Log-Out'},
+  {
+    id: 7,
+    icon: require("../../assets/images/delete.png"),
+    label: "Account Privacy",
+    isSwitch: true,
+  },
+  {
+    id: 6,
+    icon: require("../../assets/images/logimages.png"),
+    label: "Log-Out",
+  },
 ];
 
 const Menu = () => {
@@ -48,121 +58,172 @@ const Menu = () => {
   const [data, setData] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
 
   const dispatch = useDispatch();
+
+  const toggleSwitch = async () => {
+    const newStatus = !isNotificationsEnabled;
+    const formData = new FormData();
+    formData.append("private_account", newStatus);
+
+    try {
+      const token = await getKey("AuthKey");
+      const requestOptions = {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: formData,
+      };
+      const response = await fetch(
+        "https://apis.suniyenetajee.com/api/v1/account/profile/",
+        requestOptions
+      );
+      if (response.ok) {
+        setIsNotificationsEnabled(newStatus);
+        setData((prevData) => ({
+          ...prevData,
+          private_account: newStatus,
+        }));
+      } else {
+        console.error("Error response:", response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  };
 
   const logoutAndClearAsyncStorage = async () => {
     try {
       await Promise.all(
-        [AsyncStorageKey].map(async element => {
+        [AsyncStorageKey].map(async (element) => {
           const key = Object.keys(element);
           await Promise.all(
-            key.map(async item => {
+            key.map(async (item) => {
               await AsyncStorage.removeItem(item);
-            }),
+            })
           );
-        }),
+        })
       );
       dispatch(setToken(false));
     } catch (error) {
-      console.error('Error clearing AsyncStorage:', error);
+      console.error("Error clearing AsyncStorage:", error);
     }
   };
 
   useEffect(() => {
     const backAction = () => {
-      navigation.navigate('BottomTabStack');
+      // navigation.navigate("BottomTabStack");
       return true;
     };
 
     const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
+      "hardwareBackPress",
+      backAction
     );
 
     return () => backHandler.remove();
   }, [navigation]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchProfileDatas();
-  }, []);
+    const focusListener = navigation.addListener("focus", () => {
+      setLoading(true);
+      fetchProfileDatas();
+    });
 
-  const handleNavigate = label => {
+    return () => {
+      navigation.removeListener("focus", focusListener);
+    };
+  }, [navigation]);
+
+  const handleNavigate = (label) => {
     switch (label) {
-      case 'Edit':
-        navigation.navigate('EditProfileScreen');
+      case "Edit":
+        navigation.navigate("EditProfileScreen");
         break;
-      case 'Support':
-        navigation.navigate('Support');
+      case "Support":
+        navigation.navigate("Support");
         break;
-      case 'Draft':
-        navigation.navigate('Draft');
+      case "Draft":
+        navigation.navigate("Draft");
         break;
-      case 'Delete Account':
+      case "Delete Account":
         setModalVisible(true);
         break;
-      case 'Find Friends':
-        navigation.navigate('FindFriendsScreen');
+      case "Find Friends":
+        navigation.navigate("FindFriendsScreen");
         break;
       default:
-        navigation.navigate('ReuseScreen');
+      // navigation.navigate("ReuseScreen");
     }
   };
 
   const fetchProfileDatas = async () => {
     try {
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const requestOptions = {
-        method: 'GET',
+        method: "GET",
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+          Accept: "application/json",
+          "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
       };
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/profile/',
-        requestOptions,
+        "https://apis.suniyenetajee.com/api/v1/account/profile/",
+        requestOptions
       );
       if (response.ok) {
         const responseData = await response.json();
         setData(responseData);
+        setIsNotificationsEnabled(responseData.private_account);
       } else {
-        console.error('Error response:', response.status, response.statusText);
+        console.error("Error response:", response.status, response.statusText);
       }
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const renderItem = ({item}) => (
+  const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={[styles.itemContainer, {borderBottomWidth: 0.5}]}
+      activeOpacity={0.9}
+      style={[styles.itemContainer, { borderBottomWidth: 0.5 }]}
       onPress={() => {
-        if (item.label === 'Log-Out') {
+        if (item.label === "Log-Out") {
           logoutAndClearAsyncStorage();
         } else {
           handleNavigate(item.label);
         }
-      }}>
+      }}
+    >
       <Image
         source={item.icon}
         style={[
           styles.imgstyle,
-          item.id === 1 && {height: 22, width: 22, marginLeft: 2},
-          item.id === 4 && {height: 20, width: 20, marginLeft: 2},
+          item.id === 1 && { height: 22, width: 22, marginLeft: 2 },
+          item.id === 4 && { height: 20, width: 20, marginLeft: 2 }, 
         ]}
       />
       <Text
         style={[
           styles.listtxt,
-          item.label === 'Log-Out' && {color: 'red', top: RfH(2)},
-        ]}>
+          item.label === "Log-Out" && { color: "red", top: RfH(2) },
+        ]}
+      >
         {item.label}
       </Text>
+      {item.isSwitch && (
+        <Switch
+          value={isNotificationsEnabled}
+          onValueChange={toggleSwitch}
+          style={styles.switch}
+        />
+      )}
     </TouchableOpacity>
   );
 
@@ -177,10 +238,10 @@ const Menu = () => {
       .then(() => {
         setModalVisible(false);
         logoutAndClearAsyncStorage();
-        console.log('Account deleted');
+        console.log("Account deleted");
       })
-      .catch(error => {
-        console.error('Error deleting account:', error);
+      .catch((error) => {
+        console.error("Error deleting account:", error);
       });
   };
 
@@ -188,20 +249,23 @@ const Menu = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('Home')}
-          style={styles.leftItem}>
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate("Home")}
+          style={styles.leftItem}
+        >
           <Icon name="left" size={20} color={colors.black} />
           <Text style={styles.title}>Profile</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigation.navigate('EditProfileScreen')}
-          style={styles.rightItem}>
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate("EditProfileScreen")}
+          style={styles.rightItem}
+        >
           <FeatherIcon
             name="edit"
             size={20}
             color={colors.black}
-            style={{alignSelf: 'center'}}
+            style={{ alignSelf: "center" }}
           />
         </TouchableOpacity>
       </View>
@@ -220,7 +284,8 @@ const Menu = () => {
                 <View style={styles.profileContainer}>
                   <TouchableOpacity
                     activeOpacity={0.9}
-                    onPress={() => setIsImageViewerVisible(true)}>
+                    onPress={() => setIsImageViewerVisible(true)}
+                  >
                     {data.picture ? (
                       <Image
                         source={{
@@ -230,7 +295,7 @@ const Menu = () => {
                       />
                     ) : (
                       <Image
-                        source={require('../../assets/images/dummyplaceholder.png')}
+                        source={require("../../assets/images/dummyplaceholder.png")}
                         style={styles.profileImage}
                       />
                     )}
@@ -241,9 +306,12 @@ const Menu = () => {
                         ? `${data.full_name.slice(0, 13)}...`
                         : data.full_name}
                     </Text>
-                    <Text style={styles.profilePhoneNumber}>
-                      {data.phone_number}
-                    </Text>
+                    {data.private_account === false ? (
+                      <Text style={styles.profilePhoneNumber}>
+                        {data.phone_number}
+                      </Text>
+                    ) : null}
+                    {console.log(data,"data.party.namebxcnb")}
                     {data.party && (
                       <View style={styles.partyContainer}>
                         <Text style={styles.partyName}>{data.party.name}</Text>
@@ -264,94 +332,39 @@ const Menu = () => {
                   <Text>No data found</Text>
                 </View>
               )}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  paddingVertical: 8,
-                  justifyContent: 'space-around',
-                  marginTop: RfH(15),
-                  marginHorizontal: RfW(10),
-                }}>
+              <View style={styles.postcontainer}>
                 <TouchableOpacity
-                  onPress={() => navigation.navigate('Profile', {item: data})}
+                  activeOpacity={0.9}
+                  onPress={() => navigation.navigate("Profile", { item: data })}
                   style={{
-                    alignItems: 'center',
+                    alignItems: "center",
                     marginHorizontal: RfW(5),
-                  }}>
-                  <Text
-                    style={{
-                      color: colors.black,
-                      fontFamily: 'Poppins-Medium',
-                      fontSize: 12,
-                    }}>
-                    {data?.total_post || 0}
-                  </Text>
-                  <Text
-                    style={{
-                      color: colors.black,
-                      fontFamily: 'Poppins-Medium',
-                      fontSize: 12,
-                    }}>
-                    Post
-                  </Text>
+                  }}
+                >
+                  <Text style={styles.numofpost}>{data?.total_post || 0}</Text>
+                  <Text style={styles.numofpost}>Post</Text>
                 </TouchableOpacity>
-                <View
-                  style={{
-                    borderWidth: 0.2,
-                    borderColor: colors.DARK_GRAY,
-                    marginHorizontal: RfW(15),
-                  }}></View>
+                <View style={styles.bordersty}></View>
                 <Pressable
-                  style={{alignItems: 'center'}}
-                  onPress={() => navigation.navigate('FollowersScreen')}>
-                  <Text
-                    style={{
-                      color: colors.black,
-                      fontFamily: 'Poppins-Medium',
-                      fontSize: 12,
-                    }}>
-                    {data?.total_followers}
-                  </Text>
-                  <Text
-                    style={{
-                      color: colors.black,
-                      fontFamily: 'Poppins-Medium',
-                      fontSize: 12,
-                    }}>
-                    Followers
-                  </Text>
+                  style={{ alignItems: "center" }}
+                  onPress={() => navigation.navigate("FollowersScreen")}
+                >
+                  <Text style={styles.numofpost}>{data?.total_followers}</Text>
+                  <Text style={styles.numofpost}>Followers</Text>
                 </Pressable>
-                <View
-                  style={{
-                    borderWidth: 0.2,
-                    borderColor: colors.DARK_GRAY,
-                    marginHorizontal: RfW(15),
-                  }}></View>
+                <View style={styles.bordersty}></View>
                 <Pressable
-                  style={{alignItems: 'center'}}
-                  onPress={() => navigation.navigate('FollowingScreen')}>
-                  <Text
-                    style={{
-                      color: colors.black,
-                      fontFamily: 'Poppins-Medium',
-                      fontSize: 12,
-                    }}>
-                    {data?.total_following}
-                  </Text>
-                  <Text
-                    style={{
-                      color: colors.black,
-                      fontFamily: 'Poppins-Medium',
-                      fontSize: 12,
-                    }}>
-                    Followings
-                  </Text>
+                  style={{ alignItems: "center" }}
+                  onPress={() => navigation.navigate("FollowingScreen")}
+                >
+                  <Text style={styles.numofpost}>{data?.total_following}</Text>
+                  <Text style={styles.numofpost}>Followings</Text>
                 </Pressable>
               </View>
             </View>
           }
           renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item) => item.id.toString()}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -367,7 +380,8 @@ const Menu = () => {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(!modalVisible);
-        }}>
+        }}
+      >
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
@@ -375,13 +389,17 @@ const Menu = () => {
             </Text>
             <View style={styles.modalButtonContainer}>
               <TouchableOpacity
+                activeOpacity={0.9}
                 style={[styles.button, styles.buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}>
+                onPress={() => setModalVisible(!modalVisible)}
+              >
                 <Text style={styles.textStyle}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
+                activeOpacity={0.9}
                 onPress={() => handleDeleteAccount()}
-                style={[styles.button, styles.buttonRemove]}>
+                style={[styles.button, styles.buttonRemove]}
+              >
                 <Text style={styles.textStyle}>Delete</Text>
               </TouchableOpacity>
             </View>
@@ -410,17 +428,17 @@ const styles = StyleSheet.create({
     backgroundColor: colors.WHITE,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 10,
     borderBottomWidth: 0.2,
-    borderColor: 'gray',
+    borderColor: "gray",
   },
   leftItem: {
     left: RfH(20),
     marginTop: RfH(12),
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingBottom: RfH(10),
   },
   rightItem: {
@@ -428,10 +446,16 @@ const styles = StyleSheet.create({
     marginTop: RfH(12),
     paddingBottom: RfH(10),
   },
+  switch: {
+    marginLeft: "auto",
+  },
+  itemTouchable: {
+    flex: 1,
+  },
   profileContainer: {
     paddingHorizontal: RfW(20),
     marginTop: RfH(15),
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   profileImage: {
     height: 100,
@@ -446,37 +470,37 @@ const styles = StyleSheet.create({
   },
   profileName: {
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: "500",
     color: colors.black,
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
   },
   profilePhoneNumber: {
     fontSize: 15,
-    fontWeight: '400',
-    color: '#535763',
-    fontFamily: 'Poppins-Medium',
+    fontWeight: "400",
+    color: "#535763",
+    fontFamily: "Poppins-Medium",
   },
   partyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   partyName: {
     fontSize: 15,
-    fontWeight: '400',
-    color: '#535763',
-    fontFamily: 'Poppins-Medium',
+    fontWeight: "400",
+    color: "#535763",
+    fontFamily: "Poppins-Medium",
   },
   partySymbol: {
     height: RfH(30),
     width: RfW(30),
     borderRadius: RfH(10),
     borderWidth: 1,
-    marginLeft: RfW(1),
-    bottom: RfH(7),
+    marginLeft: RfW(2),
+    bottom: RfH(2),
   },
   itemContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: RfH(15),
     borderBottomColor: colors.GRAY,
     paddingHorizontal: RfW(20),
@@ -487,36 +511,36 @@ const styles = StyleSheet.create({
   },
   listtxt: {
     fontSize: 15,
-    fontWeight: '400',
-    color: '#535763',
-    fontFamily: 'Poppins-Medium',
+    fontWeight: "400",
+    color: "#535763",
+    fontFamily: "Poppins-Medium",
     paddingHorizontal: RfW(10),
   },
   loadingIndicator: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: "500",
     color: colors.black,
-    fontFamily: 'Poppins-Medium',
+    fontFamily: "Poppins-Medium",
     marginLeft: 10,
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalView: {
-    width: '80%',
-    backgroundColor: 'white',
+    width: "80%",
+    backgroundColor: "white",
     borderRadius: 10,
     padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -527,31 +551,48 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
     color: colors.black,
-    fontFamily: 'Poppins-SemiBoldItalic',
+    fontFamily: "Poppins-SemiBoldItalic",
     fontSize: 16,
   },
   modalButtonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
   button: {
     borderRadius: 20,
     padding: 10,
     elevation: 2,
-    width: '45%',
+    width: "45%",
   },
   buttonClose: {
     backgroundColor: colors.skyblue,
   },
   textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   buttonRemove: {
-    backgroundColor: 'red',
+    backgroundColor: "red",
+  },
+  postcontainer: {
+    flexDirection: "row",
+    paddingVertical: 8,
+    justifyContent: "space-around",
+    marginTop: RfH(15),
+    marginHorizontal: RfW(10),
+  },
+  numofpost: {
+    color: colors.black,
+    fontFamily: "Poppins-Medium",
+    fontSize: 12,
+  },
+  bordersty: {
+    borderWidth: 0.2,
+    borderColor: colors.DARK_GRAY,
+    marginHorizontal: RfW(15),
   },
 });

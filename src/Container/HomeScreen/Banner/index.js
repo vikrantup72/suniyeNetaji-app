@@ -44,6 +44,7 @@ const BannerScreen = () => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#fff',
+    marginBottom:10
   },
   bannerContainer: {
     justifyContent: 'center',
