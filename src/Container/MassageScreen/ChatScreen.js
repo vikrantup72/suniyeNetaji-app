@@ -1,522 +1,414 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  Dimensions,
-  TextInput,
-  TouchableOpacity,
-  Modal,
-  Image,
-  TouchableWithoutFeedback,
+	View,
+	Modal,
+	TouchableOpacity,
+	Image,
+	Text,
+	StyleSheet,
+	TouchableWithoutFeedback,
+	Keyboard,
+	TextInput,
+	SafeAreaView,
 } from "react-native";
-import { RfH, RfW } from "../../utils/helper";
-import { colors } from "../../utils";
-import Icon from "react-native-vector-icons/AntDesign";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { useDispatch, useSelector } from "react-redux";
-import { Groupmsglisting } from "../../redux/ChatReducerSlice";
-import { useAndroidBackHandler } from "react-navigation-backhandler";
-import { useNavigation } from "@react-navigation/native";
-import DocumentPicker from "react-native-document-picker";
+import { Bubble, GiftedChat, Send } from "react-native-gifted-chat";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
+import DocumentPicker from "react-native-document-picker";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
+import GroupHeader from "./components/GroupHeader";
+import { SCREEN_HEIGHT } from "../../utils/helper";
+import Video from "react-native-video";
+import { colors } from "../../utils";
 
-const ChatScreen = ({ route }) => {
-  const { item } = route?.params || [];
-  console.log(item, "bnb");
+const ChatScreen = () => {
+	const [messages, setMessages] = useState([
+		{
+			_id: 1,
+			text: "Hello! How are you?",
+			createdAt: new Date(),
+			user: {
+				_id: 2,
+				name: "John Doe",
+			},
+		},
+		{
+			_id: 2,
+			text: "I'm good, thanks! What about you?",
+			createdAt: new Date(),
+			user: {
+				_id: 1,
+				name: "You",
+			},
+		},
+	]);
+	const [previewVisible, setPreviewVisible] = useState(false);
+	const [isModalVisible, setModalVisible] = useState(false);
+	const [selectedMedia, setSelectedMedia] = useState(null);
 
-  const navigation = useNavigation();
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState(null);
-  const [message, setMessage] = useState("");
+	const onSend = useCallback((newMessages = []) => {
+		setMessages((previousMessages) =>
+			GiftedChat.append(previousMessages, newMessages)
+		);
+	}, []);
+	const togglePreview = () => setPreviewVisible(!previewVisible);
+	const toggleModal = () => {
+		Keyboard.dismiss();
+		setTimeout(() => {
+			setModalVisible(!isModalVisible);
+		}, 100);
+	};
 
-  useAndroidBackHandler(() => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-      return true;
-    }
-    return false;
-  });
+	// Handle media picking
+	const handleCameraLaunch = () => {
+		setModalVisible(false);
+		launchCamera({ mediaType: "photo" }, (response) => {
+			if (!response.didCancel && !response.errorCode) {
+				handleMediaUpload(response.assets[0].uri, "image");
+			}
+		});
+	};
 
-  const room_id = item?.room_id || item?.id;
-  console.log(room_id, "room_id");
+	const handleGalleryLaunch = () => {
+		setModalVisible(false);
+		launchImageLibrary({ mediaType: "photo" }, (response) => {
+			if (!response.didCancel && !response.errorCode) {
+				handleMediaUpload(response.assets[0].uri, "image");
+			}
+		});
+	};
 
-  const dispatch = useDispatch();
-  const groupmassage = useSelector((state) => state.chat.groupmsg);
-  const messages = groupmassage?.results?.messages || [];
+	const handleDocumentPick = async () => {
+		setModalVisible(false);
+		try {
+			const result = await DocumentPicker.pick({
+				type: [DocumentPicker.types.allFiles],
+			});
+			handleMediaUpload(result[0].uri, result[0]?.type);
+		} catch (err) {
+			if (DocumentPicker.isCancel(err)) {
+				console.log("User canceled the document picker");
+			} else {
+				throw err;
+			}
+		}
+	};
 
-  useEffect(() => {
-    if (room_id && item?.room_type === "group") {
-      dispatch(Groupmsglisting(room_id));
-    }
-  }, [room_id, dispatch]);
+	// Handle media upload and add to the chat
+	const handleMediaUpload = (uri, type) => {
+		setSelectedMedia({ uri, type });
+		toggleModal();
+		togglePreview();
+	};
 
-  const renderItem = ({ item }) => (
-    <View style={styles.msgcontainer}>
-      <Text style={styles.namesty}>{item.sender_full_name}</Text>
-      <Text style={styles.messageText}>{item.content}</Text>
-      <Text style={styles.timesty}>
-        {new Date(item.timestamp).toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        })}
-      </Text>
-    </View>
-  );
+	const confirmSendMedia = () => {
+		const newMessage = {
+			_id: Math.random().toString(36).substr(2, 9),
+			createdAt: new Date(),
+			user: {
+				_id: 1,
+				name: "You",
+			},
+			text: selectedMedia?.text || "",
+			image: selectedMedia?.type?.includes("image") ? selectedMedia.uri : null,
+			video: selectedMedia?.type?.includes("video") ? selectedMedia.uri : null,
+		};
+		setMessages((previousMessages) =>
+			GiftedChat.append(previousMessages, [newMessage])
+		);
+		setSelectedMedia(null);
+		togglePreview(); // Hide preview
+	};
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
+	const groupName = "React Native Devs";
+	const participants = 120;
+	const groupAvatar =
+		"https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg"; // Replace with your image URL
 
-  const handleDocumentPick = async () => {
-    try {
-      const result = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles],
-      });
-      setSelectedMedia({ uri: result[0].uri, type: "document" });
-      toggleModal();
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-        console.log("User canceled the document picker");
-      } else {
-        throw err;
-      }
-    }
-  };
+	// Customize message bubble background color
+	const renderBubble = (props) => {
+		return (
+			<Bubble
+				{...props}
+				wrapperStyle={{
+					left: {
+						backgroundColor: "#f0f0f0", // Background color for received messages
+					},
+					right: {
+						backgroundColor: colors.skyblue, // Background color for sent messages
+					},
+				}}
+				textStyle={{
+					left: {
+						color: "#000", // Text color for received messages
+					},
+					right: {
+						color: "#fff", // Text color for sent messages
+					},
+				}}
+			/>
+		);
+	};
 
-  const handleCameraLaunch = () => {
-    launchCamera({ mediaType: "photo" }, (response) => {
-      if (!response.didCancel && !response.errorCode) {
-        setSelectedMedia({ uri: response.assets[0].uri, type: "image" });
-        toggleModal();
-      }
-    });
-  };
+	const renderMessageMedia = (props) => {
+		const { currentMessage } = props;
 
-  const handleGalleryLaunch = () => {
-    launchImageLibrary({ mediaType: "photo" }, (response) => {
-      if (!response.didCancel && !response.errorCode) {
-        setSelectedMedia({ uri: response.assets[0].uri, type: "image" });
-        toggleModal();
-      }
-    });
-  };
+		if (currentMessage.image) {
+			return (
+				<TouchableOpacity>
+					<Image
+						source={{ uri: currentMessage.image }}
+						style={styles.messageImage}
+					/>
+				</TouchableOpacity>
+			);
+		} else if (currentMessage.video) {
+			return (
+				<TouchableOpacity>
+					<Video
+						source={{ uri: currentMessage.video }}
+						style={styles.messageImage}
+						controls={false} // Disable controls for the small preview
+					/>
+				</TouchableOpacity>
+			);
+		}
 
-  const handleSend = () => {
-    if (selectedMedia) {
-      console.log("Selected Media URI:", selectedMedia.uri);
-    } else if (message.trim()) {
-      console.log("Message:", message);
-    } else {
-      console.log("No media or message to send.");
-    }
+		return null;
+	};
 
-    // Reset after sending
-    setSelectedMedia(null);
-    setMessage("");
-  };
+	return (
+		<View style={styles.container}>
+			<GroupHeader
+				groupName={groupName}
+				participants={participants}
+				groupAvatar={groupAvatar}
+			/>
+			<GiftedChat
+				messages={messages}
+				onSend={(newMessages) => onSend(newMessages)}
+				user={{ _id: 1, name: "You" }}
+				renderSend={(props) => (
+					<Send {...props}>
+						<View style={styles.sendButton}>
+							<Ionicons name="send" size={24} color="white" />
+						</View>
+					</Send>
+				)}
+				renderActions={() => (
+					<TouchableOpacity style={styles.uploadButton} onPress={toggleModal}>
+						<Ionicons name="attach" size={24} color={colors.skyblue} />
+					</TouchableOpacity>
+				)}
+				renderBubble={renderBubble}
+				renderMessageImage={renderMessageMedia}
+				renderMessageVideo={renderMessageMedia}
+			/>
+			<Modal
+				transparent={true}
+				visible={isModalVisible}
+				animationType="fade"
+				onRequestClose={toggleModal}
+			>
+				<TouchableWithoutFeedback onPress={toggleModal}>
+					<View style={styles.modalOverlay}>
+						<TouchableWithoutFeedback>
+							<View style={styles.modalcontainers}>
+								<TouchableOpacity
+									style={styles.option}
+									onPress={handleDocumentPick}
+								>
+									<View style={styles.iconcontainer}>
+										<MaterialIcons
+											name="insert-drive-file"
+											size={24}
+											color="white"
+										/>
+									</View>
+									<Text style={styles.optionText}>Document</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={styles.option}
+									onPress={handleCameraLaunch}
+								>
+									<View style={styles.iconcontainer}>
+										<MaterialIcons
+											name="photo-camera"
+											size={24}
+											color="white"
+										/>
+									</View>
+									<Text style={styles.optionText}>Camera</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={styles.option}
+									onPress={handleGalleryLaunch}
+								>
+									<View style={styles.iconcontainer}>
+										<MaterialIcons
+											name="photo-library"
+											size={24}
+											color="white"
+										/>
+									</View>
+									<Text style={styles.optionText}>Gallery</Text>
+								</TouchableOpacity>
+							</View>
+						</TouchableWithoutFeedback>
+					</View>
+				</TouchableWithoutFeedback>
+			</Modal>
 
-  const removeSelectedMedia = () => {
-    setSelectedMedia(null);
-  };
+			<Modal
+				transparent={true}
+				visible={previewVisible}
+				animationType="fade"
+				onRequestClose={togglePreview}
+			>
+				<View style={styles.previewOverlay}>
+					<Text
+						onPress={togglePreview}
+						style={{
+							color: "#fff",
+							fontSize: 34,
+							alignSelf: "flex-start",
+							position: "absolute",
+							top: 0,
+							left: 10,
+						}}
+					>
+						⛌
+					</Text>
+					{/* media secion */}
+					<View
+						style={{
+							height: SCREEN_HEIGHT * 0.4,
+							justifyContent: "center",
+							alignItems: "center",
+							backgroundColor: "rgba(255,255,255, 0.2)",
+						}}
+					>
+						{selectedMedia?.type?.includes("image") ? (
+							<Image
+								source={{
+									uri: selectedMedia?.uri,
+								}}
+								resizeMode="contain"
+								style={{ width: "100%", height: "100%" }}
+							/>
+						) : (
+							<Video
+								source={{
+									uri: selectedMedia?.uri,
+								}}
+								style={{ width: "100%", height: "100%" }}
+								volume={10}
+							/>
+						)}
+					</View>
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.headersty}>
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon
-              name="left"
-              size={20}
-              color={colors.black}
-              style={styles.backIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={
-              item?.room_type === "group"
-                ? () => navigation.navigate("GroupInfo", { item })
-                : null
-            }
-            style={styles.headerTouchable}
-          >
-            <View style={styles.profileimagecon}>
-              {item?.image ? (
-                <Image
-                  source={{
-                    uri: `https://stage.suniyenetajee.com${item.image}`,
-                  }}
-                  style={styles.imgsty}
-                />
-              ) : item?.picture ? (
-                <Image
-                  source={{
-                    uri: `https://stage.suniyenetajee.com${item.picture}`,
-                  }}
-                  style={styles.imgsty}
-                />
-              ) : (
-                <Image
-                  source={require("../../assets/images/dummyplaceholder.png")}
-                  style={styles.imgsty}
-                />
-              )}
-            </View>
-            <View>
-              <Text
-                style={[
-                  item?.room_type === "group"
-                    ? styles.headername2
-                    : styles.headername,
-                ]}
-              >
-                {item?.display_name}
-                {item?.full_name}
-              </Text>
-              {item?.room_type === "group" && (
-                <Text style={styles.infotxtsty}>tap here for group info</Text>
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {item?.room_type === "group" && (
-        <View style={styles.homecontainer}>
-          <FlatList
-            data={messages}
-            showsVerticalScrollIndicator={false}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
-            contentContainerStyle={styles.flatListContent}
-          />
-        </View>
-      )}
-
-      {selectedMedia && (
-        <View style={styles.selectedMediaContainer}>
-          {selectedMedia.type === "image" && (
-            <Image
-              source={{ uri: selectedMedia.uri }}
-              resizeMethod="resize"
-              style={styles.selectimagecon}
-            />
-          )}
-          {selectedMedia.type === "document" && (
-            <View style={styles.documentPreview}>
-              <Image
-                source={{ uri: selectedMedia.uri }}
-                resizeMethod="resize"
-                style={styles.selectimagecon}
-              />
-            </View>
-          )}
-          <TouchableOpacity
-            style={styles.removeIconContainer}
-            onPress={removeSelectedMedia}
-          >
-            <Ionicons name="close-circle" size={28} color={"red"} />
-          </TouchableOpacity>
-        </View>
-      )}
-
-      <View style={styles.inputsty}>
-        <TouchableOpacity
-          onPress={toggleModal}
-          style={styles.mediaIconContainer}
-        >
-          <MaterialIcons name="perm-media" size={25} color={colors.skyblue} />
-        </TouchableOpacity>
-        <View style={styles.inputcontainer}>
-          <TextInput
-            placeholder="write your message.."
-            style={styles.inputtxtsty}
-            value={message}
-            onChangeText={(text) => setMessage(text)}
-          />
-        </View>
-        <TouchableOpacity
-          onPress={handleSend}
-          style={styles.sendButtonContainer}
-        >
-          <Ionicons
-            name="send"
-            size={18}
-            color={colors.WHITE}
-            style={styles.sendIcon}
-          />
-        </TouchableOpacity>
-      </View>
-
-      <Modal
-        transparent={true}
-        visible={isModalVisible}
-        animationType="fade"
-        onRequestClose={toggleModal}
-      >
-        <TouchableWithoutFeedback onPress={toggleModal}>
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback>
-              <View style={styles.modalcontainers}>
-                <TouchableOpacity
-                  style={styles.option}
-                  onPress={handleDocumentPick}
-                >
-                  <View style={styles.iconcontainer}>
-                    <MaterialIcons
-                      name="insert-drive-file"
-                      size={24}
-                      color={colors.WHITE}
-                      style={{ alignSelf: "center" }}
-                    />
-                  </View>
-                  <Text style={styles.optionText}>Document</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.option}
-                  onPress={handleCameraLaunch}
-                >
-                  <View style={styles.iconcontainer}>
-                    <MaterialIcons
-                      name="photo-camera"
-                      size={24}
-                      color={colors.WHITE}
-                      style={{ alignSelf: "center" }}
-                    />
-                  </View>
-                  <Text style={styles.optionText}>Camera</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.option}
-                  onPress={handleGalleryLaunch}
-                >
-                  <View style={styles.iconcontainer}>
-                    <MaterialIcons
-                      name="photo-library"
-                      size={24}
-                      color={colors.WHITE}
-                      style={{ alignSelf: "center" }}
-                    />
-                  </View>
-                  <Text style={styles.optionText}>Gallery</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
-    </View>
-  );
+					<View
+						style={{
+							backgroundColor: "#fff",
+							marginTop: 20,
+							position: "absolute",
+							bottom: 0,
+							width: "100%",
+							borderRadius: 8,
+							paddingHorizontal: 10,
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<TextInput
+							placeholder="Add Description here..."
+							placeholderTextColor={"gray"}
+							onChangeText={(text) =>
+								setSelectedMedia((prev) => ({
+									...prev,
+									text: text,
+								}))
+							}
+							style={{ width: "90%" }}
+						/>
+						<View
+							style={{
+								backgroundColor: colors.skyblue,
+								width: 40,
+								height: 34,
+								borderRadius: 12,
+								alignItems: "center",
+								justifyContent: "center",
+								paddingBottom: 4,
+							}}
+						>
+							<Text
+								onPress={confirmSendMedia}
+								style={{ color: "#fff", fontSize: 20 }}
+							>
+								➤
+							</Text>
+						</View>
+					</View>
+				</View>
+			</Modal>
+		</View>
+	);
 };
 
-export default ChatScreen;
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.WHITE,
-  },
-  homecontainer: {
-    marginTop: RfH(20),
-    paddingHorizontal: RfW(20),
-  },
-  headersty: {
-    flexDirection: "row",
-    paddingHorizontal: RfW(15),
-    paddingVertical: RfH(15),
-    justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: colors.GRAY,
-  },
-  selectimagecon: {
-    height: RfW(320),
-    width: RfW(330),
-    alignSelf: "center",
-    borderColor: colors.GRAY,
-    borderWidth: 2,
-    borderRadius: 10,
-  },
-  modalcontainers: {
-    backgroundColor: colors.WHITE,
-    flexDirection: "row",
-    height: RfH(150),
-    width: "94%",
-    justifyContent: "space-around",
-    borderRadius: 20,
-    position: "absolute",
-    bottom: 50,
-    alignSelf: "center",
-  },
-  headerRow: {
-    flexDirection: "row",
-    top: RfH(3),
-  },
-  backIcon: {
-    top: RfH(10),
-  },
-  headerTouchable: {
-    flexDirection: "row",
-    width: "100%",
-  },
-  selectimg: {
-    height: "100%",
-    width: "100%",
-    resizeMode: "cover",
-    borderRadius: 10,
-  },
-  removeIconContainer: {
-    position: "absolute",
-    alignSelf: "flex-end",
-    right: 20,
-    top: -15,
-  },
-  msgcontainer: {
-    padding: RfH(10),
-    marginVertical: RfH(10),
-    maxWidth: Dimensions.get("window").width * 0.7,
-    minWidth: RfW(100),
-    alignSelf: "flex-start",
-    backgroundColor: colors.shadwo_blue,
-    borderBottomRightRadius: RfH(20),
-    borderTopLeftRadius: RfH(20),
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-  },
-  imgsty: {
-    height: RfH(36),
-    width: RfW(36),
-    borderRadius: RfH(18),
-    resizeMode: "cover",
-  },
-  namesty: {
-    fontSize: 12,
-  },
-  timesty: {
-    alignSelf: "flex-end",
-    color: colors.skyblue,
-    fontSize: 11,
-    fontFamily: "Poppins-Regular",
-    top: 2,
-  },
-  iconcontainer: {
-    alignSelf: "center",
-    backgroundColor: colors.skyblue,
-    height: 50,
-    width: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    marginTop: RfH(35),
-  },
-  inputsty: {
-    position: "absolute",
-    bottom: RfH(0),
-    flexDirection: "row",
-    paddingHorizontal: RfW(20),
-    backgroundColor: colors.WHITE,
-    paddingVertical: RfH(5),
-  },
-  profileimagecon: {
-    height: RfH(36),
-    width: RfW(36),
-    borderWidth: 1,
-    borderRadius: RfH(18),
-    resizeMode: "cover",
-    borderColor: colors.GRAY,
-    marginHorizontal: 10,
-    top: 1,
-  },
-  messageText: {
-    fontSize: 13,
-    fontFamily: "Poppins-Regular",
-    color: colors.skyblue,
-  },
-  infotxtsty: {
-    fontSize: 11,
-    color: colors.DARK_GRAY,
-    left: 2,
-  },
-  sendmsgcontainer: {
-    padding: RfH(10),
-    marginVertical: RfH(5),
-    maxWidth: Dimensions.get("window").width * 0.7,
-    alignSelf: "flex-end",
-    backgroundColor: "#EBEAEA",
-  },
-  sendmsgtxt: {
-    color: colors.black,
-  },
-  flatListContent: {
-    paddingBottom: RfH(130),
-  },
-  inputcontainer: {
-    backgroundColor: "#EBEBEB",
-    width: "80%",
-    paddingHorizontal: RfW(10),
-    flexDirection: "row",
-    borderRadius: RfH(8),
-    left: RfW(10),
-    height: RfH(40),
-  },
-  inputtxtsty: {
-    color: colors.black,
-    fontSize: 14,
-    fontWeight: "400",
-    fontFamily: "Poppins-Regular",
-    justifyContent: "center",
-    top: RfH(1),
-  },
-  mediaIconContainer: {
-    top: RfH(5),
-  },
-  sendButtonContainer: {
-    backgroundColor: colors.skyblue,
-    height: 40,
-    width: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    left: RfW(14),
-    bottom: RfH(3),
-  },
-  sendIcon: {
-    alignSelf: "center",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalView: {
-    margin: RfH(20),
-    backgroundColor: "white",
-    borderRadius: RfH(20),
-    padding: RfH(35),
-    width: RfW(220),
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  headername: {
-    fontSize: 16,
-    color: colors.black,
-    fontWeight: "500",
-    top: RfH(7),
-  },
-  headername2: {
-    fontSize: 16,
-    color: colors.black,
-    fontWeight: "500",
-  },
+	container: { flex: 1, backgroundColor: "white" },
+	sendButton: {
+		backgroundColor: "#007AFF",
+		padding: 10,
+		borderRadius: 20,
+		justifyContent: "center",
+		alignItems: "center",
+		marginRight: 10,
+	},
+	selectedMediaContainer: { marginTop: 10, marginBottom: 10 },
+	selectimagecon: { width: 300, height: 300, borderRadius: 10 },
+	removeIconContainer: { position: "absolute", right: 20, top: 10 },
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: "rgba(0,0,0,0.1)",
+		justifyContent: "flex-end",
+	},
+	previewOverlay: {
+		flex: 1,
+		backgroundColor: colors.skyblue,
+		justifyContent: "center",
+		position: "relative",
+	},
+	modalcontainers: {
+		backgroundColor: "white",
+		flexDirection: "row",
+		padding: 40,
+		borderRadius: 20,
+		alignItems: "flex-start",
+		justifyContent: "space-between",
+		bottom: 50,
+	},
+	option: { alignItems: "center" },
+	iconcontainer: {
+		backgroundColor: colors.skyblue,
+		padding: 15,
+		borderRadius: 50,
+		marginBottom: 10,
+	},
+	optionText: { color: colors.skyblue },
+	uploadButton: {
+		marginLeft: 10,
+		justifyContent: "center",
+		alignItems: "center",
+		marginBottom: 10,
+	},
+	messageImage: {
+		width: 200,
+		height: 200,
+		borderRadius: 10,
+		margin: 5,
+	},
 });
+
+export default ChatScreen;
