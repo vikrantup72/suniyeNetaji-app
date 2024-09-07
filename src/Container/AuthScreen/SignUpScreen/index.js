@@ -73,7 +73,7 @@
 //       }
 
 //       const response = await fetch(
-//         'https://apis.suniyenetajee.com/api/v1/account/registration/',
+//         'https://stage.suniyenetajee.com/api/v1/account/registration/',
 //         {
 //           method: 'POST',
 //           headers: {
@@ -448,7 +448,7 @@ const SignupScreen = ({navigation}) => {
       }
       console.log(formData);
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/registration/',
+        'https://stage.suniyenetajee.com/api/v1/account/registration/',
         {
           method: 'POST',
           headers: {

@@ -18,6 +18,7 @@ import Header from '../../utils/Header';
 import debounce from 'lodash.debounce';
 import {useDispatch, useSelector} from 'react-redux';
 import {setFollowedUserId} from '../../redux/DataSource';
+import { useAndroidBackHandler } from 'react-navigation-backhandler';
 
 const FindFriendsScreen = () => {
   const navigation = useNavigation();
@@ -32,8 +33,16 @@ const FindFriendsScreen = () => {
   const {isFollowedUserId} = useSelector(state => state.dataSource);
   const dispatch = useDispatch();
   useEffect(() => {
-    fetchData('https://apis.suniyenetajee.com/api/v1/account/users/');
+    fetchData('https://stage.suniyenetajee.com/api/v1/account/users/');
   }, []);
+
+  useAndroidBackHandler(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return true;
+    }
+    return false; // Let the system handle the back button event
+  });
 
   useEffect(() => {
     if (query.length > 0) {
@@ -103,7 +112,7 @@ const FindFriendsScreen = () => {
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/account/users/?search=${searchQuery}`,
+        `https://stage.suniyenetajee.com/api/v1/account/users/?search=${searchQuery}`,
         {
           headers: {
             Accept: 'application/json',
@@ -126,7 +135,7 @@ const FindFriendsScreen = () => {
       try {
         const token = await getKey('AuthKey');
         const response = await fetch(
-          `https://apis.suniyenetajee.com/api/v1/account/users/?search=${query}`,
+          `https://stage.suniyenetajee.com/api/v1/account/users/?search=${query}`,
           {
             headers: {
               Accept: 'application/json',
@@ -164,7 +173,7 @@ const FindFriendsScreen = () => {
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/follow-unfollow/',
+        'https://stage.suniyenetajee.com/api/v1/account/follow-unfollow/',
         {
           method: 'POST',
           headers: {
@@ -197,7 +206,7 @@ const FindFriendsScreen = () => {
         onPress={() => navigation.navigate('UserProfile', {item})}>
         {item?.picture ? (
           <Image
-            source={{uri: `https://apis.suniyenetajee.com${item.picture}`}}
+            source={{uri: `https://stage.suniyenetajee.com${item.picture}`}}
             style={{
               height: RfH(50),
               width: RfW(50),

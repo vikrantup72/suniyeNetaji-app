@@ -1,16 +1,18 @@
-import React, {useEffect} from 'react';
-import {StyleSheet, View, Image, SafeAreaView} from 'react-native';
-import {SwiperFlatList} from 'react-native-swiper-flatlist';
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchAdvertisementdata} from '../../../redux/SocialReducer';
-import {RfH, RfW} from '../../../utils/helper';
-import {colors} from '../../../utils';
+import React, { useEffect } from "react";
+import { StyleSheet, View, Image, SafeAreaView } from "react-native";
+import { SwiperFlatList } from "react-native-swiper-flatlist";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAdvertisementdata } from "../../../redux/SocialReducer";
+import { RfH, RfW } from "../../../utils/helper";
+import { colors } from "../../../utils";
 
 const BannerScreen = () => {
   const dispatch = useDispatch();
-  const {advertisementData, loading, error} = useSelector(
-    state => state.social,
+  const { advertisementData, loading, error } = useSelector(
+    (state) => state.social
   );
+
+  console.log(advertisementData, "advertisementData");
 
   useEffect(() => {
     dispatch(fetchAdvertisementdata());
@@ -25,13 +27,12 @@ const BannerScreen = () => {
         index={0}
         ListEmptyComponent={() => <View style={styles.bannerContainer} />}
         data={advertisementData}
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <View style={styles.bannerContainer}>
             <Image
               source={{
-                uri: `https://apis.suniyenetajee.com${item?.image}`,
+                uri: `https://stage.suniyenetajee.com${item?.image}`,
               }}
-              // resizeMode='contain'
               style={styles.bannerImage}
             />
           </View>
@@ -43,25 +44,25 @@ const BannerScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    marginBottom:10
+    backgroundColor: "#fff",
+    marginBottom: 10,
   },
   bannerContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     height: RfH(200),
     borderRadius: RfH(15),
     marginHorizontal: RfW(19),
     marginTop: RfH(15),
-    alignSelf: 'center',
+    alignSelf: "center",
     width: RfW(337),
     backgroundColor: colors.shadwo_blue,
   },
   bannerImage: {
     width: RfW(337),
-    height: '100%',
+    height: "100%",
     borderRadius: RfH(15),
-    alignSelf: 'center',
+    alignSelf: "center",
   },
 });
 

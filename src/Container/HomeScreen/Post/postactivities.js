@@ -47,8 +47,6 @@ const PostActivities = ({item}) => {
     return 'Follow';
   };
 
-  const isFollowed = item?.is_following;
-
   return (
     <View>
       <TouchableOpacity onPress={toggleFollow} disabled={loading}>

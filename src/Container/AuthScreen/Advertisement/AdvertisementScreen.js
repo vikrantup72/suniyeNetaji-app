@@ -13,7 +13,7 @@ const AdvertisementScreen = WrappedComponent => {
     const navigation = useNavigation();
     const isFocused = useIsFocused();
 
-    const BASE_URL = 'https://apis.suniyenetajee.com';
+    const BASE_URL = 'https://stage.suniyenetajee.com';
     const AD_INTERVAL = 3600000; // 1 hour in milliseconds
 
     useEffect(() => {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import {getToken} from '../utils/helper';
 
 const api = axios.create({
-  baseURL: 'https://apis.suniyenetajee.com/api/v1/',
+  baseURL: 'https://stage.suniyenetajee.com/api/v1/',
 
   //   timeout: 10000, // Adjust the timeout as needed
 });
@@ -21,36 +21,6 @@ api.interceptors.request.use(
     return Promise.reject(error);
   },
 );
-
-// Response interceptor for authorized requests
-// api.interceptors.response.use(
-//   response => {
-//     // Handle response data, such as refreshing tokens, etc.
-//     return response;
-//   },
-//   async error => {
-//     const originalRequest = error.config;
-
-//     // If unauthorized and refresh token is available, attempt to refresh token
-//     if (error.response?.status === 401 && !originalRequest._retry) {
-//       originalRequest._retry = true;
-
-//       try {
-//         const newToken = await refreshToken(); // Implement your token refresh logic
-//         if (newToken) {
-//           originalRequest.headers.Authorization = `Bearer ${newToken}`;
-//           return axios(originalRequest);
-//         }
-//       } catch (refreshError) {
-//         // Handle token refresh error
-//         return Promise.reject(refreshError);
-//       }
-//     }
-
-//     // Handle other error cases
-//     return Promise.reject(error);
-//   },
-// );
 
 // Common function for API requests
 const makeRequest = async (method, url, data = null, headers = {}) => {

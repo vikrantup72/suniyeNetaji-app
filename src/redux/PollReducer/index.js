@@ -8,7 +8,7 @@ export const fetchPollData = createAsyncThunk(
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/polling/voted-polling/',
+        'https://stage.suniyenetajee.com/api/v1/polling/voted-polling/',
         {
           method: 'GET',
           headers: {

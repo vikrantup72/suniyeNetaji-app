@@ -7,7 +7,7 @@ export const GetProfile = createAsyncThunk(
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/account/get-profile/${userid}/`,
+        `https://stage.suniyenetajee.com/api/v1/account/get-profile/${userid}/`,
         {
           method: 'GET',
           headers: {
@@ -60,7 +60,7 @@ export const updateProfile = createAsyncThunk(
       const token = await getKey('AuthKey');
       console.log(token, 'updateprofile');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/profile/',
+        'https://stage.suniyenetajee.com/api/v1/account/profile/',
         {
           method: 'PUT',
           headers: {
@@ -89,7 +89,7 @@ export const fetchProfileData = createAsyncThunk(
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/profile/',
+        'https://stage.suniyenetajee.com/api/v1/account/profile/',
         {
           method: 'GET',
           headers: {

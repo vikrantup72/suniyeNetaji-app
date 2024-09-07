@@ -8,6 +8,8 @@ import { useDispatch } from 'react-redux';
 import { dislikePost, likePost } from '../../redux/DataSource';
 
 const SocialActivities = ({ Commentimg, item }) => {
+  // console.log(item,"jbmhbjhb");
+  
   const [likeCount, setLikeCount] = useState(item?.total_likes_count || 0);
   const [isLiked, setIsLiked] = useState(item?.is_like);
   const [totalShareCount, setTotalShareCount] = useState(item?.total_share_count || 0);
@@ -38,7 +40,7 @@ const SocialActivities = ({ Commentimg, item }) => {
       const token = await getKey('AuthKey');
       console.log('Token:', token);
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/post/like-dislike/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/post/like-dislike/${id}/`,
         {
           method: 'POST',
           headers: {
@@ -70,7 +72,7 @@ const SocialActivities = ({ Commentimg, item }) => {
 
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/post/share/${item?.id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/post/share/${item?.id}/`,
         {
           method: 'POST',
           headers: {

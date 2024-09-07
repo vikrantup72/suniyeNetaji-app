@@ -13,45 +13,56 @@ import {
   Pressable,
   Modal,
   Switch,
+  ToastAndroid,
 } from "react-native";
 import { colors } from "../../utils";
 import { AsyncStorageKey, RfH, RfW, getKey } from "../../utils/helper";
 import Icon from "react-native-vector-icons/AntDesign";
 import FeatherIcon from "react-native-vector-icons/Feather";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { DeleteAccount, setToken } from "../../redux/ProfileSlice";
 import ImageViewing from "react-native-image-viewing";
+import { BottomSheet } from "react-native-btr";
+import AccountPrivacyBottomSheet from "./AccountPrivacyBottomSheet";
+import { useAndroidBackHandler } from "react-navigation-backhandler";
 
 const menuItems = [
   { id: 1, icon: require("../../assets/images/edit.png"), label: "Edit" },
   { id: 2, icon: require("../../assets/images/support.png"), label: "Support" },
   { id: 3, icon: require("../../assets/images/offer.png"), label: "Draft" },
   {
-    id: 5,
+    id: 4,
     icon: require("../../assets/images/friend.png"),
     label: "Find Friends",
   },
   {
-    id: 4,
-    icon: require("../../assets/images/delete.png"),
-    label: "Delete Account",
-  },
-  {
-    id: 7,
-    icon: require("../../assets/images/delete.png"),
-    label: "Account Privacy",
-    isSwitch: true,
+    id: 5,
+    icon: require("../../assets/images/KYC.png"),
+    label: "Kyc",
   },
   {
     id: 6,
+    icon: require("../../assets/images/delete.png"),
+    label: "Delete Account",
+  },
+  // {
+  //   id: 7,
+  //   icon: require("../../assets/images/lock.png"),
+  //   label: "Account Privacy",
+  //   isSwitch: true,
+  // },
+  {
+    id: 8,
     icon: require("../../assets/images/logimages.png"),
     label: "Log-Out",
   },
 ];
 
 const Menu = () => {
+  const route = useRoute();
+  const { kycadd } = route.params || {};
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -59,42 +70,28 @@ const Menu = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isImageViewerVisible, setIsImageViewerVisible] = useState(false);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
+  const [accountPrivacyVisible, setAccountPrivacyVisible] = useState(false);
 
   const dispatch = useDispatch();
-
-  const toggleSwitch = async () => {
-    const newStatus = !isNotificationsEnabled;
-    const formData = new FormData();
-    formData.append("private_account", newStatus);
-
-    try {
-      const token = await getKey("AuthKey");
-      const requestOptions = {
-        method: "PUT",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: formData,
-      };
-      const response = await fetch(
-        "https://apis.suniyenetajee.com/api/v1/account/profile/",
-        requestOptions
-      );
-      if (response.ok) {
-        setIsNotificationsEnabled(newStatus);
-        setData((prevData) => ({
-          ...prevData,
-          private_account: newStatus,
-        }));
-      } else {
-        console.error("Error response:", response.status, response.statusText);
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-    }
+  const toggleAccountPrivacySheet = () => {
+    setAccountPrivacyVisible(!accountPrivacyVisible);
   };
 
+  useAndroidBackHandler(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return true;
+    }
+    return false; // Let the system handle the back button event
+  });
+
+  // const isKycVerified = useSelector((state) => state.kyc.isKycVerified);
+
+  const handleMenuItemPress = (item) => {
+    if (item.label === "Account Privacy") {
+      toggleAccountPrivacySheet();
+    }
+  };
   const logoutAndClearAsyncStorage = async () => {
     try {
       await Promise.all(
@@ -149,6 +146,9 @@ const Menu = () => {
       case "Draft":
         navigation.navigate("Draft");
         break;
+      case "Kyc":
+        navigation.navigate("GetKycScreen");
+        break;
       case "Delete Account":
         setModalVisible(true);
         break;
@@ -156,7 +156,6 @@ const Menu = () => {
         navigation.navigate("FindFriendsScreen");
         break;
       default:
-      // navigation.navigate("ReuseScreen");
     }
   };
 
@@ -172,7 +171,7 @@ const Menu = () => {
         },
       };
       const response = await fetch(
-        "https://apis.suniyenetajee.com/api/v1/account/profile/",
+        "https://stage.suniyenetajee.com/api/v1/account/profile/",
         requestOptions
       );
       if (response.ok) {
@@ -188,6 +187,7 @@ const Menu = () => {
       setLoading(false);
     }
   };
+  console.log(data, "fetchProfileDatas");
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
@@ -196,6 +196,8 @@ const Menu = () => {
       onPress={() => {
         if (item.label === "Log-Out") {
           logoutAndClearAsyncStorage();
+        } else if (item.label === "Account Privacy") {
+          handleMenuItemPress(item);
         } else {
           handleNavigate(item.label);
         }
@@ -206,7 +208,15 @@ const Menu = () => {
         style={[
           styles.imgstyle,
           item.id === 1 && { height: 22, width: 22, marginLeft: 2 },
-          item.id === 4 && { height: 20, width: 20, marginLeft: 2 }, 
+          item.id === 6 && { height: 20, width: 20, marginLeft: 2 },
+          item.id === 5 && {
+            height: 22,
+            width: 22,
+            marginLeft: 2,
+            tintColor: colors.black,
+          },
+
+          item.id === 4 && { height: 20, width: 20, marginLeft: 2 },
         ]}
       />
       <Text
@@ -217,13 +227,6 @@ const Menu = () => {
       >
         {item.label}
       </Text>
-      {item.isSwitch && (
-        <Switch
-          value={isNotificationsEnabled}
-          onValueChange={toggleSwitch}
-          style={styles.switch}
-        />
-      )}
     </TouchableOpacity>
   );
 
@@ -281,52 +284,62 @@ const Menu = () => {
           ListHeaderComponent={
             <View>
               {data ? (
-                <View style={styles.profileContainer}>
-                  <TouchableOpacity
-                    activeOpacity={0.9}
-                    onPress={() => setIsImageViewerVisible(true)}
-                  >
-                    {data.picture ? (
-                      <Image
-                        source={{
-                          uri: `https://apis.suniyenetajee.com${data.picture}`,
-                        }}
-                        style={styles.profileImage}
-                      />
-                    ) : (
-                      <Image
-                        source={require("../../assets/images/dummyplaceholder.png")}
-                        style={styles.profileImage}
-                      />
-                    )}
-                  </TouchableOpacity>
-                  <View style={styles.profileInfo}>
-                    <Text style={styles.profileName}>
-                      {data.full_name.length > 15
-                        ? `${data.full_name.slice(0, 13)}...`
-                        : data.full_name}
-                    </Text>
-                    {data.private_account === false ? (
-                      <Text style={styles.profilePhoneNumber}>
-                        {data.phone_number}
-                      </Text>
-                    ) : null}
-                    {console.log(data,"data.party.namebxcnb")}
-                    {data.party && (
-                      <View style={styles.partyContainer}>
-                        <Text style={styles.partyName}>{data.party.name}</Text>
-                        {data.party.symbol && (
-                          <Image
-                            source={{
-                              uri: `https://apis.suniyenetajee.com${data.party.symbol}`,
-                            }}
-                            style={styles.partySymbol}
-                          />
-                        )}
-                      </View>
-                    )}
+                <>
+                  <View style={styles.profileContainer}>
+                    <TouchableOpacity
+                      activeOpacity={0.9}
+                      onPress={() => setIsImageViewerVisible(true)}
+                    >
+                      {data.picture ? (
+                        <Image
+                          source={{
+                            uri: `https://stage.suniyenetajee.com${data.picture}`,
+                          }}
+                          style={styles.profileImage}
+                        />
+                      ) : (
+                        <Image
+                          source={require("../../assets/images/dummyplaceholder.png")}
+                          style={styles.profileImage}
+                        />
+                      )}
+                    </TouchableOpacity>
+                    <View style={styles.profileInfo}>
+                      <Text style={styles.profileName}>{data?.full_name}</Text>
+                      {data.account_privacy !== "public" &&
+                      data.account_privacy !== "friends" ? null : (
+                        <Text style={styles.profilePhoneNumber}>
+                          {data.phone_number}
+                        </Text>
+                      )}
+
+                      {console.log(data, "data.party.namebxcnb")}
+                      {data.party && (
+                        <View style={styles.partyContainer}>
+                          <Text style={styles.partyName}>
+                            {data.party.name}
+                          </Text>
+                          {data.party.symbol && (
+                            <Image
+                              source={{
+                                uri: `https://stage.suniyenetajee.com${data.party.symbol}`,
+                              }}
+                              style={styles.partySymbol}
+                            />
+                          )}
+                        </View>
+                      )}
+                    </View>
                   </View>
-                </View>
+                  {/* {isKycVerified ? null : ( */}
+                  {/* <TouchableOpacity
+                    onPress={() => navigation.navigate("KycVarifyScreen")}
+                    style={{ left: RfW(40), top: RfH(8) }}
+                  >
+                    <Text style={{ color: "red" }}>Not varify</Text>
+                  </TouchableOpacity> */}
+                  {/* )} */}
+                </>
               ) : (
                 <View>
                   <Text>No data found</Text>
@@ -339,6 +352,7 @@ const Menu = () => {
                   style={{
                     alignItems: "center",
                     marginHorizontal: RfW(5),
+                    bottom: 1,
                   }}
                 >
                   <Text style={styles.numofpost}>{data?.total_post || 0}</Text>
@@ -409,12 +423,16 @@ const Menu = () => {
       <ImageViewing
         images={[
           {
-            uri: `https://apis.suniyenetajee.com${data.picture}`,
+            uri: `https://stage.suniyenetajee.com${data.picture}`,
           },
         ]}
         imageIndex={0}
         visible={isImageViewerVisible}
         onRequestClose={() => setIsImageViewerVisible(false)}
+      />
+      <AccountPrivacyBottomSheet
+        visible={accountPrivacyVisible}
+        toggleBottomSheet={toggleAccountPrivacySheet}
       />
     </SafeAreaView>
   );
@@ -525,7 +543,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "500",
     color: colors.black,
-    fontFamily: "Poppins-Medium",
+    // fontFamily: "Poppins-Medium",
     marginLeft: 10,
   },
   modalContainer: {

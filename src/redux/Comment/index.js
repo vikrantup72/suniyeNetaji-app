@@ -12,7 +12,7 @@ export const createComment = createAsyncThunk(
 
       const token = await getKey('AuthKey');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/cms/comment/',
+        'https://stage.suniyenetajee.com/api/v1/cms/comment/',
         {
           method: 'POST',
           headers: {
@@ -42,7 +42,7 @@ export const deleteComment = createAsyncThunk(
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment/delete/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment/delete/${id}/`,
         {
           method: 'DELETE',
           headers: {
@@ -75,7 +75,7 @@ export const updateComment = createAsyncThunk(
       console.log('FormData:', formData);
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment/${id}/`,
         {
           method: 'PUT',
           headers: {
@@ -109,7 +109,7 @@ export const updateReplyComment = createAsyncThunk(
       console.log('FormData:', formData);
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment-reply/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment-reply/${id}/`,
         {
           method: 'PUT',
           headers: {

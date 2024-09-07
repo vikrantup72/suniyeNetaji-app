@@ -1,25 +1,25 @@
-import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import {getKey} from '../../utils/helper';
-import {ToastAndroid} from 'react-native';
-import {addHomeDashboardData, addToDataSource} from '../DataSource';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { getKey } from "../../utils/helper";
+import { ToastAndroid } from "react-native";
+import { addHomeDashboardData, addToDataSource } from "../DataSource";
 
 // Fetch Data
-export const fetchData = createAsyncThunk('post/fetchData', async dispath => {
+export const fetchData = createAsyncThunk("post/fetchData", async (dispath) => {
   try {
-    const token = await getKey('AuthKey');
+    const token = await getKey("AuthKey");
     const response = await fetch(
-      'https://apis.suniyenetajee.com/api/v1/cms/post/',
+      "https://stage.suniyenetajee.com/api/v1/cms/post/",
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+          Accept: "application/json",
+          "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
-      },
+      }
     );
     if (!response.ok) {
-      throw new Error('Network response was not ok');
+      throw new Error("Network response was not ok");
     }
     const data = await response.json();
     return data;
@@ -30,173 +30,176 @@ export const fetchData = createAsyncThunk('post/fetchData', async dispath => {
 
 // Delete Post
 export const deletePost = createAsyncThunk(
-  'post/deletePost',
+  "post/deletePost",
   async (id, thunkAPI) => {
     try {
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/post/delete/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/post/delete/${id}/`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            Accept: 'application/json',
+            Accept: "application/json",
             Authorization: `Token ${token}`,
           },
-        },
+        }
       );
       if (response.ok) {
-        ToastAndroid.show('Post deleted successfully.', ToastAndroid.BOTTOM);
-        return {id};
+        ToastAndroid.show("Post deleted successfully.", ToastAndroid.BOTTOM);
+        return { id };
       } else {
-        throw new Error('API error');
+        throw new Error("API error");
       }
     } catch (error) {
       throw error;
     }
-  },
+  }
 );
 
 // Create Post
 export const createPost = createAsyncThunk(
-  'post/createPost',
+  "post/createPost",
   async (
-    {textInputValue, selectedImage, selectedVideo, navigation},
-    thunkAPI,
+    { textInputValue, selectedImage, selectedVideo, navigation },
+    thunkAPI
   ) => {
     try {
       const formData = new FormData();
-      formData.append('description', textInputValue);
-      formData.append('status', 'publish');
+      formData.append("description", textInputValue);
+      formData.append("status", "publish");
 
-      if (selectedImage && selectedImage.path) {
-        formData.append('banner_image', {
-          uri: selectedImage.path,
-          name: selectedImage.filename || 'image.jpg',
-          type: selectedImage.mime || 'image/jpeg',
+      // Check if `selectedImage` is an array and append each image
+      if (Array.isArray(selectedImage) && selectedImage.length > 0) {
+        selectedImage.forEach((image) => {
+          formData.append("media", {
+            uri: image.path,
+            name: image.filename || "image.jpg",
+            type: image.mime || "image/jpeg",
+          });
         });
       }
 
       if (selectedVideo && selectedVideo.path) {
-        formData.append('video', {
+        formData.append("video", {
           uri: selectedVideo.path,
-          name: selectedVideo.filename || 'video.mp4',
-          type: selectedVideo.mime || 'video/mp4',
+          name: selectedVideo.filename || "video.mp4",
+          type: selectedVideo.mime || "video/mp4",
         });
       }
 
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/cms/post/',
+        "https://stage.suniyenetajee.com/api/v1/cms/create-post/",
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            Accept: 'application/json',
+            Accept: "application/json",
             Authorization: `Token ${token}`,
           },
           body: formData,
-        },
+        }
       );
-
       if (response.ok) {
         const responseData = await response.json();
-        ToastAndroid.show('Post Uploaded', ToastAndroid.BOTTOM);
-        // await thunkAPI.dispatch(fetchData());
-        navigation.navigate('Home', {item: responseData});
+        console.log(responseData, "responseDatancvvhvchsav");
+
+        ToastAndroid.show("Post Uploaded", ToastAndroid.BOTTOM);
+        navigation.navigate("Home", { item: responseData });
         return responseData;
       } else {
-        console.log('error');
-        throw new Error('API error');
+        console.log("error");
+        throw new Error("API error");
       }
     } catch (error) {
       throw error;
     }
-  },
+  }
 );
 
 // Update Post
 export const updatePost = createAsyncThunk(
-  'post/updatePost',
+  "post/updatePost",
   async (
-    {id, textInputValue, selectedImage, selectedVideo, navigation},
-    thunkAPI,
+    { id, textInputValue, selectedImage, selectedVideo, navigation },
+    thunkAPI
   ) => {
     try {
       const formData = new FormData();
-      formData.append('description', textInputValue);
-      formData.append('status', 'publish');
+      formData.append("description", textInputValue);
+      formData.append("status", "publish");
 
-      if (selectedImage && selectedImage.path) {
-        formData.append('banner_image', {
-          uri: selectedImage.path,
-          name: selectedImage.filename || 'image.jpg',
-          type: selectedImage.mime || 'image/jpeg',
-        });
-      }
+      // if (selectedImage && selectedImage.path) {
+      //   formData.append("banner_image", {
+      //     uri: selectedImage.path,
+      //     name: selectedImage.filename || "image.jpg",
+      //     type: selectedImage.mime || "image/jpeg",
+      //   });
+      // }
 
       if (selectedVideo && selectedVideo.path) {
-        formData.append('video', {
+        formData.append("video", {
           uri: selectedVideo.path,
-          name: selectedVideo.filename || 'video.mp4',
-          type: selectedVideo.mime || 'video/mp4',
+          name: selectedVideo.filename || "video.mp4",
+          type: selectedVideo.mime || "video/mp4",
         });
       }
 
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/post/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/update-post/${id}/`,
         {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            Accept: 'application/json',
+            Accept: "application/json",
             Authorization: `Token ${token}`,
           },
           body: formData,
-        },
+        }
       );
 
       if (response.ok) {
         const responseData = await response.json();
-        ToastAndroid.show('Post Edit Successful', ToastAndroid.BOTTOM);
+        ToastAndroid.show("Post Edit Successful", ToastAndroid.BOTTOM);
         await thunkAPI.dispatch(fetchData());
-        navigation.navigate('Home', {item: responseData});
+        navigation.navigate("Home", { item: responseData });
         return responseData;
       } else {
-        throw new Error('API error');
+        throw new Error("API error");
       }
     } catch (error) {
       throw error;
     }
-  },
+  }
 );
 
 // Share Post
 export const SharePost = createAsyncThunk(
-  'post/SharePost',
-  async ({id}, thunkAPI) => {
+  "post/SharePost",
+  async ({ id }, thunkAPI) => {
     try {
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/post/share/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/post/share/${id}/`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            Accept: 'application/json',
+            Accept: "application/json",
             Authorization: `Token ${token}`,
           },
-        },
+        }
       );
       if (response.ok) {
         const responseData = await response.json();
         await thunkAPI.dispatch(fetchData());
-        console.log(responseData, 'responseData');
+        console.log(responseData, "responseData");
         return responseData;
       } else {
-        throw new Error('API error');
+        throw new Error("API error");
       }
     } catch (error) {
       throw error;
     }
-  },
+  }
 );
 
 const initialState = {
@@ -206,12 +209,12 @@ const initialState = {
 };
 
 const dataSlice = createSlice({
-  name: 'post',
+  name: "post",
   initialState,
   reducers: {},
-  extraReducers: builder => {
+  extraReducers: (builder) => {
     builder
-      .addCase(fetchData.pending, state => {
+      .addCase(fetchData.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
@@ -223,7 +226,7 @@ const dataSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(createPost.pending, state => {
+      .addCase(createPost.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
@@ -235,33 +238,33 @@ const dataSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(deletePost.pending, state => {
+      .addCase(deletePost.pending, (state) => {
         state.loading = false;
         state.error = null;
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = state.data.filter(post => post.id !== action.payload.id);
+        state.data = state.data.filter((post) => post.id !== action.payload.id);
       })
       .addCase(deletePost.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(updatePost.pending, state => {
+      .addCase(updatePost.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(updatePost.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = state.data.map(post =>
-          post.id === action.payload.id ? action.payload : post,
+        state.data = state.data.map((post) =>
+          post.id === action.payload.id ? action.payload : post
         );
       })
       .addCase(updatePost.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
-      .addCase(SharePost.pending, state => {
+      .addCase(SharePost.pending, (state) => {
         state.loading = false;
         state.error = null;
       })

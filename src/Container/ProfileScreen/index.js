@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react';
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -9,37 +9,56 @@ import {
   ActivityIndicator,
   Dimensions,
   Pressable,
+  Platform,
+  PermissionsAndroid,
+  Alert,
+  Linking,
   RefreshControl,
-} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {colors} from '../../utils';
-import {RfH, RfW, getKey, hp} from '../../utils/helper';
-import {useNavigation} from '@react-navigation/native';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import styles from './styles';
-import Header from '../../utils/Header';
-import {useDispatch, useSelector} from 'react-redux';
-import {GetProfile} from '../../redux/ProfileSlice';
-import CustomImage from '../../Component/CustomImage';
-import SocialActivityes from '../../Component/socialactivityes/SocialActivityes';
-import Video from 'react-native-video';
-import {BottomSheet} from 'react-native-btr';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import Feather from 'react-native-vector-icons/Feather';
-import {deletePost} from '../../redux/PostReducer';
-import {addProfileData, addToDataSource} from '../../redux/DataSource';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { colors } from "../../utils";
+import { RfH, RfW, getKey, hp } from "../../utils/helper";
+import { useNavigation } from "@react-navigation/native";
+import MaterialIcon from "react-native-vector-icons/MaterialIcons";
+import styles from "./styles";
+import Header from "../../utils/Header";
+import { useDispatch, useSelector } from "react-redux";
+import { GetProfile } from "../../redux/ProfileSlice";
+import CustomImage from "../../Component/CustomImage";
+import SocialActivityes from "../../Component/socialactivityes/SocialActivityes";
+import Video from "react-native-video";
+import { BottomSheet } from "react-native-btr";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import Feather from "react-native-vector-icons/Feather";
+import { deletePost } from "../../redux/PostReducer";
+import { addProfileData, addToDataSource } from "../../redux/DataSource";
+import ImageViewing from "react-native-image-viewing";
+import { SwiperFlatList } from "react-native-swiper-flatlist";
+import RNFetchBlob from "rn-fetch-blob";
+import { useAndroidBackHandler } from "react-navigation-backhandler";
 
-const Profile = ({route}) => {
+const Profile = ({ route }) => {
   const item = route.params || {};
   const userid = item?.id?.created_by?.user_id || item?.item?.userid;
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
   const {
     datas,
     loading: profileLoading,
     error,
-  } = useSelector(state => state.profile);
-  const {profileData, mainDataSource} = useSelector(state => state.dataSource);
+  } = useSelector((state) => state.profile);
+  const { profileData, mainDataSource } = useSelector(
+    (state) => state.dataSource
+  );
+
+  useAndroidBackHandler(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return true;
+    }
+    return false;
+  });
 
   const [data, setData] = useState([]);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -51,11 +70,109 @@ const Profile = ({route}) => {
   const [imageSizes, setImageSizes] = useState({});
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [hasMore, setHasMore] = useState(true);
+  const [isImageViewerVisible, setImageViewerVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [editItem, setEditItem] = useState(null);
 
-  const screenHeight = Dimensions.get('window').height;
-  const screenWidth = Dimensions.get('window').width;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
 
-  const handleDeletePost = id => {
+  const swiperFlatListRef = useRef(null);
+
+  const downloadFile = async (url, fileName) => {
+    const { config, fs } = RNFetchBlob;
+    const downloadDest = `${fs.dirs.DownloadDir}/${fileName}`;
+
+    config({
+      fileCache: true,
+      path: downloadDest,
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        notification: true,
+        path: downloadDest,
+        description: "Downloading file.",
+      },
+    })
+      .fetch("GET", url)
+      .then((res) => {
+        console.log("File downloaded successfully:", res.path());
+        Alert.alert("Download Success", "File downloaded successfully");
+      })
+      .catch((err) => {
+        console.error("Download error:", err);
+        Alert.alert(
+          "Download Error",
+          "An error occurred while downloading the file"
+        );
+      });
+  };
+
+  const handleSave = async (mediaItem) => {
+    if (!mediaItem) {
+      console.error("No mediaItem provided");
+      return;
+    }
+
+    const { media, video } = mediaItem;
+
+    const downloadMedia = async (url) => {
+      const fileName = url.split("/").pop();
+      console.log("Downloading:", fileName);
+      await downloadFile(url, fileName);
+    };
+
+    if (media) {
+      await downloadMedia(media);
+    }
+    if (video) {
+      await downloadMedia(video);
+    }
+    setBottomSheetVisible(false);
+  };
+
+  const requestDownloadPermission = async () => {
+    if (Platform.OS === "android") {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: "Storage Permission Required",
+            message:
+              "This app needs access to your storage to download Photos and Videos",
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log("Storage permission granted");
+          return true;
+        } else {
+          console.log("Storage permission denied");
+          Alert.alert(
+            "Permission Denied",
+            "Storage permission is required to download files. Please grant the permission in the app settings.",
+            [
+              {
+                text: "OK",
+                onPress: () => console.log("OK Pressed"),
+              },
+              {
+                text: "Open Settings",
+                onPress: () => Linking.openSettings(),
+              },
+            ]
+          );
+          return false;
+        }
+      } catch (err) {
+        console.error("Error requesting storage permission:", err);
+        return false;
+      }
+    } else {
+      return true;
+    }
+  };
+
+  const handleDeletePost = (id) => {
     setSelectedPostId(id);
     setBottomSheetVisible(true);
   };
@@ -64,45 +181,50 @@ const Profile = ({route}) => {
     if (selectedPostId) {
       dispatch(deletePost(selectedPostId))
         .then(() => {
-          setData(prevData =>
-            prevData.filter(item => item.id !== selectedPostId),
+          setData((prevData) =>
+            prevData.filter((item) => item.id !== selectedPostId)
           );
           setBottomSheetVisible(false);
           setSelectedPostId(null);
         })
-        .catch(error => {
-          console.error('Error deleting post:', error);
+        .catch((error) => {
+          console.error("Error deleting post:", error);
         });
     }
   };
 
-  const getAllPost = async newOffset => {
+  const openImageViewer = (imageUri) => {
+    setSelectedImage([{ uri: imageUri }]);
+    setImageViewerVisible(true);
+  };
+
+  const getAllPost = async (newOffset) => {
     try {
       setLoadingMore(true);
 
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/post/user-wise/?limit=10&offset=${newOffset}`,
+        `https://stage.suniyenetajee.com/api/v1/cms/post/user-wise/?limit=10&offset=${newOffset}`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
-            Accept: 'application/json',
+            Accept: "application/json",
             Authorization: `Token ${token}`,
           },
-        },
+        }
       );
       const res = await response.json();
       if (res.results.length === 0) {
         setHasMore(false);
       } else {
-        const newIds = res.results.map(post => post.id);
+        const newIds = res.results.map((post) => post.id);
         dispatch(addToDataSource(res.results));
         dispatch(addProfileData(newIds));
-        setData(prevData => [...prevData, ...res.results]);
+        setData((prevData) => [...prevData, ...res.results]);
         setOffset(newOffset);
       }
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error("Error fetching posts:", error);
     } finally {
       setLoadingMore(false);
     }
@@ -111,13 +233,13 @@ const Profile = ({route}) => {
   useEffect(() => {
     const fetchData = async () => {
       setInitialLoading(true);
-      console.log(userid, 'userid');
+      console.log(userid, "userid");
       dispatch(GetProfile(userid));
       await getAllPost(0);
       setInitialLoading(false);
     };
 
-    const unsubscribe = navigation.addListener('focus', fetchData);
+    const unsubscribe = navigation.addListener("focus", fetchData);
 
     return () => {
       unsubscribe();
@@ -130,27 +252,7 @@ const Profile = ({route}) => {
     }
   }, [datas, item]);
 
-  const onLayout = id => e => {
-    const containerWidth = e.nativeEvent?.layout?.width;
-    if (containerWidth && data && data.length > 0) {
-      const item = data.find(result => result.id === id);
-      Image.getSize(
-        item.banner_image,
-        (width, height) => {
-          const imageAspectRatio = width / height;
-          const imageHeight = containerWidth / imageAspectRatio;
-          setImageSizes(prevState => ({
-            ...prevState,
-            [id]: {width: containerWidth, height: imageHeight},
-          }));
-        },
-        () => {},
-        {cache: 'force-cache'},
-      );
-    }
-  };
-
-  const playVideo = index => {
+  const playVideo = (index) => {
     setCurrentVideoIndex(index);
     setIsPaused(false);
   };
@@ -159,28 +261,35 @@ const Profile = ({route}) => {
     setIsPaused(!isPaused);
   };
 
-  const renderListItem = ({item, index}) => {
+  const handleEditPost = (editItem) => {
+    console.log("Editing Post:", editItem);
+    setEditItem(editItem);
+    setBottomSheetVisible(true);
+  };
+
+  const renderListItem = ({ item, index }) => {
     const data = mainDataSource[item];
     const isCurrentVideo = currentVideoIndex === index;
     const imageSize = imageSizes[data.id];
     const isPostOwner = datas?.userid === data?.created_by?.user_id;
+
     return (
       <View key={data.id} style={styles.homecontainer}>
         {isPostOwner && (
           <View style={styles.massagepostcontainer}>
             <View style={styles.postcontainer}>
-              <View style={{flexDirection: 'row'}}>
+              <View style={{ flexDirection: "row" }}>
                 <View style={styles.imgcontainer}>
                   <Image
                     source={{
-                      uri: `https://apis.suniyenetajee.com${data?.created_by?.picture}`,
+                      uri: `https://stage.suniyenetajee.com${data?.created_by?.picture}`,
                     }}
                     style={{
                       height: RfH(34),
                       width: RfW(34),
                       borderRadius: RfH(16),
-                      alignSelf: 'center',
-                      resizeMode: 'cover',
+                      alignSelf: "center",
+                      resizeMode: "cover",
                     }}
                   />
                 </View>
@@ -196,16 +305,17 @@ const Profile = ({route}) => {
               <View>
                 <TouchableOpacity
                   onPress={() => handleDeletePost(data.id)}
-                  style={{width: RfW(25)}}>
+                  style={{ width: RfW(25) }}
+                >
                   <Image
-                    source={require('../../assets/images/dots.png')}
+                    source={require("../../assets/images/dots.png")}
                     style={{
                       height: RfH(12.54),
                       width: RfW(3),
                       top: RfH(5),
                       left: RfW(3),
-                      resizeMode: 'contain',
-                      alignSelf: 'center',
+                      resizeMode: "contain",
+                      alignSelf: "center",
                     }}
                   />
                 </TouchableOpacity>
@@ -214,56 +324,90 @@ const Profile = ({route}) => {
             <View>
               <Text style={styles.msgtextsty}>{data.description}</Text>
             </View>
-            <>
-              {data.banner_image && (
-                <View
-                  style={{
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginVertical: RfH(5),
-                    width: RfW(315),
+            {data.media && data.media.length > 0 && (
+              <>
+                <SwiperFlatList
+                  ref={swiperFlatListRef}
+                  data={data.media}
+                  autoplay={false}
+                  keyExtractor={(mediaItem) => mediaItem.id.toString()}
+                  renderItem={({ item: mediaItem }) => (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => openImageViewer(mediaItem.media)}
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginVertical: RfH(5),
+                        overflow: "hidden",
+                        height: RfH(300),
+                        width: screenWidth - RfH(62),
+                      }}
+                    >
+                      <Image
+                        source={{
+                          uri: mediaItem.media,
+                          cache: "force-cache",
+                        }}
+                        resizeMode="contain"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          backgroundColor: colors.LIGHT_GRAY,
+                          marginTop: hp("0.1%"),
+                          borderRadius: RfH(10),
+                        }}
+                      />
+                    </TouchableOpacity>
+                  )}
+                  onMomentumScrollEnd={(e) => {
+                    if (e && e.nativeEvent && e.nativeEvent.contentOffset) {
+                      const contentOffsetX = e.nativeEvent.contentOffset.x;
+                      const newIndex = Math.round(
+                        contentOffsetX / (screenWidth - RfH(62))
+                      );
+
+                      if (newIndex !== currentIndex) {
+                        setCurrentIndex(newIndex);
+                      }
+                    }
                   }}
-                  onLayout={onLayout(data.id)}>
-                  <CustomImage
-                    image={data.banner_image}
-                    style={[
-                      {
-                        width: '100%',
-                        height: imageSize?.height || RfH(50),
-                        resizeMode: 'cover',
-                        backgroundColor: colors.LIGHT_GRAY,
-                        marginTop: hp('0.1%'),
-                        borderRadius: RfH(10),
-                      },
-                      {width: imageSize?.width || screenWidth},
-                    ]}
-                  />
-                </View>
-              )}
-            </>
+                />
+
+                {data.media.length > 1 && (
+                  <View style={styles.imageindexsty}>
+                    <Text style={styles.indextxtsty}>
+                      {currentIndex + 1}/{data.media.length}
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+
             {data.video && (
               <View
                 style={[
                   styles.tabVideo,
                   {
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    alignSelf: 'center',
+                    justifyContent: "center",
+                    alignItems: "center",
+                    alignSelf: "center",
                     backgroundColor: colors.shadwo_blue,
                     borderRadius: RfH(8),
                     marginVertical: RfH(10),
                     padding: RfH(8),
                   },
-                ]}>
+                ]}
+              >
                 <Video
-                  source={{uri: data.video}}
+                  source={{ uri: data.video }}
                   paused={!isCurrentVideo || isPaused}
                   style={[
                     styles.video,
                     {
                       height: screenHeight * 0.5,
                       width: screenWidth * 0.8,
-                      alignSelf: 'center',
+                      alignSelf: "center",
                       left: RfW(0),
                       borderRadius: RfH(10),
                     },
@@ -280,12 +424,13 @@ const Profile = ({route}) => {
                     } else {
                       playVideo(index);
                     }
-                  }}>
+                  }}
+                >
                   {isCurrentVideo && !isPaused ? (
-                    <MaterialIcon name={'pause'} size={32} color="#128C78" />
+                    <MaterialIcon name={"pause"} size={32} color="#128C78" />
                   ) : (
                     <MaterialIcon
-                      name={'play-arrow'}
+                      name={"play-arrow"}
                       size={32}
                       color="#128C78"
                     />
@@ -295,7 +440,7 @@ const Profile = ({route}) => {
             )}
             <View style={styles.othercontainer}>
               <SocialActivityes
-                Commentimg={require('../../assets/images/comment.png')}
+                Commentimg={require("../../assets/images/comment.png")}
                 numofcomment={data?.total_comments}
                 item={data}
               />
@@ -309,10 +454,10 @@ const Profile = ({route}) => {
   const keyExtractor = (item, index) => `${item.id}-${index}`;
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: colors.WHITE}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.WHITE }}>
       <StatusBar backgroundColor={colors.GRAY} />
-      <Header HeaderTxt={'Profile'} />
-      <View style={{flex: 1, paddingBottom: RfH(20)}}>
+      <Header HeaderTxt={"Profile"} />
+      <View style={{ flex: 1, paddingBottom: RfH(20) }}>
         <FlatList
           data={profileData}
           renderItem={renderListItem}
@@ -323,14 +468,14 @@ const Profile = ({route}) => {
               <ActivityIndicator
                 size="small"
                 color={colors.skyblue}
-                style={{marginTop: RfH(70)}}
+                style={{ marginTop: RfH(70) }}
               />
             )
           }
-          contentContainerStyle={{paddingBottom: RfH(10)}}
+          contentContainerStyle={{ paddingBottom: RfH(10) }}
           ListEmptyComponent={
-            !initialLoading && data.length === 0 ? (
-              <View style={{marginTop: 20, alignItems: 'center'}}>
+            !initialLoading && data?.length === 0 ? (
+              <View style={{ marginTop: 20, alignItems: "center" }}>
                 <Text>No posts found</Text>
               </View>
             ) : null
@@ -342,30 +487,34 @@ const Profile = ({route}) => {
       <>
         <BottomSheet
           visible={bottomSheetVisible}
+          editItem={editItem}
           onBackButtonPress={() => setBottomSheetVisible(false)}
-          onBackdropPress={() => setBottomSheetVisible(false)}>
+          onBackdropPress={() => setBottomSheetVisible(false)}
+        >
           <View
             style={{
-              backgroundColor: 'white',
+              backgroundColor: "white",
               padding: 20,
               borderTopRightRadius: RfH(20),
               borderTopLeftRadius: RfH(25),
               paddingVertical: RfH(20),
-            }}>
+            }}
+          >
             <View>
               <View>
                 <TouchableOpacity
                   style={styles.bottombtncon}
-                  onPress={confirmDeletePost}>
+                  onPress={confirmDeletePost}
+                >
                   <View>
                     <AntDesign
-                      name={'delete'}
+                      name={"delete"}
                       size={20}
                       color={colors.black}
-                      style={{top: RfH(8)}}
+                      style={{ top: RfH(8) }}
                     />
                   </View>
-                  <View style={{left: RfW(12)}}>
+                  <View style={{ left: RfW(12) }}>
                     <Text style={styles.btntxt}>Delete</Text>
                     <Text style={styles.disbtntxt}>
                       This Post will be deleted permanently
@@ -373,32 +522,41 @@ const Profile = ({route}) => {
                   </View>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.bottombtncon, {marginVertical: RfH(10)}]}>
+                  onPress={() => handleEditPost(editItem)}
+                  style={[styles.bottombtncon, { marginVertical: RfH(10) }]}
+                >
                   <View>
                     <Feather
-                      name={'edit'}
+                      name={"edit"}
                       size={22}
                       color={colors.black}
-                      style={{top: RfH(6)}}
+                      style={{ top: RfH(6) }}
                     />
                   </View>
-                  <View style={{left: RfW(12)}}>
+                  <View style={{ left: RfW(12) }}>
                     <Text style={styles.btntxt}>Edit</Text>
                     <Text style={styles.disbtntxt}>
                       Click for caption or image
                     </Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.bottombtncon}>
+                <TouchableOpacity
+                  onPress={() =>
+                    requestDownloadPermission().then((granted) => {
+                      if (granted) handleSave(mainDataSource[selectedPostId]);
+                    })
+                  }
+                  style={styles.bottombtncon}
+                >
                   <View>
                     <AntDesign
-                      name={'download'}
+                      name={"download"}
                       size={22}
                       color={colors.black}
-                      style={{top: RfH(6)}}
+                      style={{ top: RfH(6) }}
                     />
                   </View>
-                  <View style={{left: RfW(12)}}>
+                  <View style={{ left: RfW(12) }}>
                     <Text style={styles.btntxt}>Save</Text>
                     <Text style={styles.disbtntxt}>
                       This image/video saved to the Gallery
@@ -410,6 +568,12 @@ const Profile = ({route}) => {
           </View>
         </BottomSheet>
       </>
+      <ImageViewing
+        images={selectedImage}
+        imageIndex={0}
+        visible={isImageViewerVisible}
+        onRequestClose={() => setImageViewerVisible(false)}
+      />
     </SafeAreaView>
   );
 };

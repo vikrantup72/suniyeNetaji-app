@@ -1,4 +1,4 @@
-const BASE_URL = 'https://apis.suniyenetajee.com/';
+const BASE_URL = 'https://stage.suniyenetajee.com/';
 
 export const CommentReplyData = async (endpoint, formData, token) => {
   try {

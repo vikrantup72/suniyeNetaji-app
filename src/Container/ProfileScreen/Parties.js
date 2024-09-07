@@ -29,7 +29,7 @@ const Parties = ({ visible, onClose, onSelect, partyData }) => {
             >
               {item.id !== -1 && (
                 <Image
-                  source={{ uri: `https://apis.suniyenetajee.com${item.symbol}`}}
+                  source={{ uri: `https://stage.suniyenetajee.com${item.symbol}`}}
                   style={styles.partyImage}
                 />
               )}

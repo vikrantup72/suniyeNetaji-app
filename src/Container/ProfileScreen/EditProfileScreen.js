@@ -31,10 +31,19 @@ import {
   fetchExperienceDataById,
 } from "../../redux/ExperienceSlice";
 import Parties from "./Parties";
+import { useAndroidBackHandler } from "react-navigation-backhandler";
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
+  useAndroidBackHandler(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return true;
+    }
+    return false; // Let the system handle the back button event
+  });
 
   const [full_name, setFull_name] = useState("");
   const [phone_number, setPhone_number] = useState("");
@@ -49,7 +58,7 @@ const EditProfileScreen = () => {
   const [party, setParty] = useState("");
   const [partyIndex, setPartyIndex] = useState();
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedExperience, setSelectedExperience] = useState(null); // State to hold the selected experience
+  const [selectedExperience, setSelectedExperience] = useState(null);
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
   const [isPartySheetVisible, setIsPartySheetVisible] = useState(false);
@@ -78,7 +87,7 @@ const EditProfileScreen = () => {
       setGender(datas.gender?.trim() || "");
       setParty(datas.party?.id || "");
       if (datas.picture) {
-        const imageURL = `https://apis.suniyenetajee.com/${datas.picture.trim()}`;
+        const imageURL = `https://stage.suniyenetajee.com/${datas.picture.trim()}`;
         setSelectedImage({ uri: imageURL });
       } else {
         setSelectedImage(null);
@@ -98,7 +107,7 @@ const EditProfileScreen = () => {
         },
       };
       const response = await fetch(
-        "https://apis.suniyenetajee.com/api/v1/master/party",
+        "https://stage.suniyenetajee.com/api/v1/master/party",
         requestOptions
       );
       if (!response.ok) {
@@ -130,15 +139,21 @@ const EditProfileScreen = () => {
   const handleUpdateProfile = async () => {
     try {
       setLoading(true);
+  
+      const nameParts = full_name.trim().split(" ");
+      const first_name = nameParts[0];
+      const last_name = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
+  
       const formData = new FormData();
-      formData.append("full_name", full_name.trim());
+      formData.append("first_name", first_name);
+      formData.append("last_name", last_name);
       formData.append("phone_number", phone_number.trim());
       formData.append("email", email.trim());
       formData.append("date_of_birth", date_of_birth.trim());
       formData.append("location", location.trim());
       formData.append("gender", gender.trim());
       formData.append("party", party === -1 ? "" : party);
-
+  
       if (newImageSelected && selectedImage) {
         formData.append("picture", {
           uri: selectedImage.uri,
@@ -146,10 +161,11 @@ const EditProfileScreen = () => {
           name: selectedImage.fileName || "profile.jpg",
         });
       }
-
+      console.log(formData, "formData");
+  
       const token = await getKey("AuthKey");
       const response = await fetch(
-        "https://apis.suniyenetajee.com/api/v1/account/profile/",
+        "https://stage.suniyenetajee.com/api/v1/account/profile/",
         {
           method: "PUT",
           headers: {
@@ -159,11 +175,13 @@ const EditProfileScreen = () => {
           body: formData,
         }
       );
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const responseData = await response.json();
+      console.log(responseData, 'responseDatabb');
+  
       console.log("update profile API response:", responseData);
       navigation.navigate("Menu");
     } catch (error) {
@@ -176,6 +194,8 @@ const EditProfileScreen = () => {
       setLoading(false);
     }
   };
+  
+  
 
   const openGallery = () => {
     const options = {
@@ -262,7 +282,7 @@ const EditProfileScreen = () => {
               <View style={styles.inputfieldsty}>
                 <TextInput
                   style={styles.profiletxt}
-                  placeholder="Enter first-Name"
+                  placeholder="Enter full-Name"
                   value={full_name}
                   onChangeText={(txt) => setFull_name(txt)}
                 />
@@ -371,24 +391,6 @@ const EditProfileScreen = () => {
               {partyData.find((p) => p.id === party)?.name || "Select Party"}
             </Text>
           </TouchableOpacity>
-          {/* <View style={styles.inputfieldsty}>
-            <Picker
-              selectedValue={party}
-              onValueChange={(itemValue, itemIndex) => {
-                setParty(itemValue);
-                setPartyIndex(itemIndex);
-              }}
-              style={styles.partyinputcon}
-            >
-              {partyData.map((party, index) => (
-                <Picker.Item
-                  key={party.id}
-                  label={party.name}
-                  value={party.id}
-                />
-              ))}
-            </Picker>
-          </View> */}
           <Parties
             visible={isPartySheetVisible}
             onClose={() => setIsPartySheetVisible(false)}

@@ -55,7 +55,7 @@ const ForgotPassOtp = ({navigation, route}) => {
         });
 
         const response = await fetch(
-          'https://apis.suniyenetajee.com/api/v1/account/verify-opt/',
+          'https://stage.suniyenetajee.com/api/v1/account/verify-opt/',
           {
             method: 'PUT',
             headers: {

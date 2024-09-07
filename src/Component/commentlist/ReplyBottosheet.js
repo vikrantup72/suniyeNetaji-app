@@ -60,7 +60,7 @@ const ReplyBottomSheet = ({isVisible, onClose, selectedItem}) => {
       }
 
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/cms/comment-reply/',
+        'https://stage.suniyenetajee.com/api/v1/cms/comment-reply/',
         {
           method: 'POST',
           headers: {
@@ -97,7 +97,7 @@ const ReplyBottomSheet = ({isVisible, onClose, selectedItem}) => {
       let token = await getKey('AuthKey');
       token = token.trim();
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment-reply/reply/${id}`,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment-reply/reply/${id}`,
         {
           method: 'GET',
           headers: {
@@ -170,7 +170,7 @@ const ReplyBottomSheet = ({isVisible, onClose, selectedItem}) => {
             <View style={styles.imgcontainer}>
               <Image
                 source={{
-                  uri: `https://apis.suniyenetajee.com${selectedItem?.created_by?.picture}`,
+                  uri: `https://stage.suniyenetajee.com${selectedItem?.created_by?.picture}`,
                 }}
                 style={{
                   height: RfH(34),
@@ -212,7 +212,7 @@ const ReplyBottomSheet = ({isVisible, onClose, selectedItem}) => {
             <View style={styles.imgcontainer}>
               <Image
                 source={{
-                  uri: `https://apis.suniyenetajee.com${item?.created_by?.picture}`,
+                  uri: `https://stage.suniyenetajee.com${item?.created_by?.picture}`,
                 }}
                 style={{
                   height: RfH(34),

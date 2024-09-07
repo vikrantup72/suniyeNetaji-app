@@ -13,7 +13,7 @@ const Replyandlikecomment = ({item, onVisibleModal}) => {
       const action = !isLiked ? 'like' : 'dislike';
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment/like-dislike/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment/like-dislike/${id}/`,
         {
           method: 'POST',
           headers: {

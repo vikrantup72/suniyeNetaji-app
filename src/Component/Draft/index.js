@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   FlatList,
@@ -10,25 +10,29 @@ import {
   RefreshControl,
   ActivityIndicator,
   StyleSheet,
-} from 'react-native';
-import Video from 'react-native-video';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useDispatch, useSelector} from 'react-redux';
-import Entypo from 'react-native-vector-icons/Entypo';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+} from "react-native";
+import Video from "react-native-video";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { useDispatch, useSelector } from "react-redux";
+import Entypo from "react-native-vector-icons/Entypo";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
-import {RfH, RfW, hp} from '../../utils/helper';
-import {colors} from '../../utils';
-import Header from '../../utils/Header';
+import { RfH, RfW, hp } from "../../utils/helper";
+import { colors } from "../../utils";
+import Header from "../../utils/Header";
 import {
   deleteDraftPost,
   fetchdraftData,
   updateDraftPost,
-} from '../../redux/DraftSlice';
-import {BottomSheet} from 'react-native-btr';
-import styles from './styles';
+} from "../../redux/DraftSlice";
+import { BottomSheet } from "react-native-btr";
+import styles from "./styles";
+import SwiperFlatList from "react-native-swiper-flatlist";
+import { useNavigation } from "@react-navigation/native";
+import { useAndroidBackHandler } from "react-navigation-backhandler";
 
-const Draft = ({navigation}) => {
+const Draft = () => {
+  const navigation = useNavigation();
   const [currentVideoIndex, setCurrentVideoIndex] = useState(null);
   const [isPaused, setIsPaused] = useState(false);
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
@@ -37,13 +41,29 @@ const Draft = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useAndroidBackHandler(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return true;
+    }
+    return false; // Let the system handle the back button event
+  });
+
+  console.log("localPostshhgv", JSON.stringify(localPosts));
+
+  const swiperFlatListRef = useRef(null);
+  console.log(swiperFlatListRef, "swiperFlatListRef");
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     dispatch(fetchdraftData()).finally(() => setRefreshing(false));
   }, [dispatch]);
 
-  const {data, loading} = useSelector(state => state.draft);
+  const { data, loading } = useSelector((state) => state.draft);
+  console.log(data, "jbjbj");
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -54,8 +74,8 @@ const Draft = ({navigation}) => {
     setLocalPosts(data);
   }, [data]);
 
-  const onViewableItemsChanged = useRef(({viewableItems}) => {
-    const visibleVideo = viewableItems.find(item => item.item.video);
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    const visibleVideo = viewableItems.find((item) => item.item.video);
     if (visibleVideo) {
       setCurrentVideoIndex(visibleVideo.index);
       setIsPaused(false);
@@ -64,7 +84,7 @@ const Draft = ({navigation}) => {
     }
   }).current;
 
-  const playVideo = index => {
+  const playVideo = (index) => {
     setCurrentVideoIndex(index);
     setIsPaused(false);
   };
@@ -73,10 +93,10 @@ const Draft = ({navigation}) => {
     setIsPaused(!isPaused);
   };
 
-  const screenHeight = Dimensions.get('window').height;
-  const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
 
-  const onLayout = item => e => {
+  const onLayout = (item) => (e) => {
     const containerWidth = e.nativeEvent?.layout?.width;
     if (containerWidth && item) {
       Image.getSize(
@@ -85,13 +105,13 @@ const Draft = ({navigation}) => {
           const imageAspectRatio = width / height;
           const imageWidth = containerWidth;
           const imageHeight = containerWidth / imageAspectRatio;
-          setImageSizes(prevState => ({
+          setImageSizes((prevState) => ({
             ...prevState,
-            [item.id]: {width: imageWidth, height: imageHeight},
+            [item.id]: { width: imageWidth, height: imageHeight },
           }));
         },
         () => {},
-        {cache: 'force-cache'},
+        { cache: "force-cache" }
       );
     }
   };
@@ -107,14 +127,14 @@ const Draft = ({navigation}) => {
       setBottomSheetVisible(false);
       try {
         await dispatch(
-          updateDraftPost({id: selectedItem.id, updatedData}),
+          updateDraftPost({ id: selectedItem.id, updatedData })
         ).unwrap();
-        setLocalPosts(prevPosts =>
-          prevPosts.filter(draft => draft.id !== selectedItem.id),
+        setLocalPosts((prevPosts) =>
+          prevPosts.filter((draft) => draft.id !== selectedItem.id)
         );
-        navigation.navigate('Home');
+        navigation.navigate("Home");
       } catch (error) {
-        console.error('Failed to update the post: ', error);
+        console.error("Failed to update the post: ", error);
       } finally {
         setLoadingUpdate(false);
       }
@@ -125,35 +145,37 @@ const Draft = ({navigation}) => {
     if (selectedItem) {
       try {
         await dispatch(deleteDraftPost(selectedItem.id)).unwrap();
-        setLocalPosts(prevPosts =>
-          prevPosts.filter(draft => draft.id !== selectedItem.id),
+        setLocalPosts((prevPosts) =>
+          prevPosts.filter((draft) => draft.id !== selectedItem.id)
         );
         setSelectedItem(null);
         setBottomSheetVisible(false);
       } catch (error) {
-        console.error('Failed to delete the post: ', error);
+        console.error("Failed to delete the post: ", error);
       }
     }
   };
 
   return (
     <SafeAreaView
-      style={[styles.container, loadingUpdate && styles.dullBackground]}>
+      style={[styles.container, loadingUpdate && styles.dullBackground]}
+    >
       <View>
-        <Header HeaderTxt={'Draft'} />
+        <Header HeaderTxt={"Draft"} />
       </View>
       {loading ? (
         <ActivityIndicator
-          size={'small'}
+          size={"small"}
           color={colors.skyblue}
-          style={{flex: 1, justifyContent: 'center', alignSelf: 'center'}}
+          style={{ flex: 1, justifyContent: "center", alignSelf: "center" }}
         />
       ) : (
         <View
-          style={[styles.container, loadingUpdate && styles.dullBackground]}>
+          style={[styles.container, loadingUpdate && styles.dullBackground]}
+        >
           <FlatList
             data={localPosts}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item) => item.id.toString()}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -161,7 +183,7 @@ const Draft = ({navigation}) => {
                 colors={[colors.skyblue]}
               />
             }
-            renderItem={({item}) => {
+            renderItem={({ item }) => {
               const imageSize = imageSizes[item.id];
               return (
                 <View>
@@ -169,21 +191,22 @@ const Draft = ({navigation}) => {
                     <TouchableOpacity
                       activeOpacity={0.8}
                       style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                      }}>
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
+                    >
                       <View style={styles.postcontainer}>
                         <View style={styles.imgcontainer}>
                           <Image
                             source={{
-                              uri: `https://apis.suniyenetajee.com${item?.created_by?.picture}`,
+                              uri: `https://stage.suniyenetajee.com${item?.created_by?.picture}`,
                             }}
                             style={{
                               height: RfH(34),
                               width: RfW(34),
                               borderRadius: RfH(16),
-                              alignSelf: 'center',
-                              resizeMode: 'cover',
+                              alignSelf: "center",
+                              resizeMode: "cover",
                             }}
                           />
                         </View>
@@ -209,15 +232,16 @@ const Draft = ({navigation}) => {
                             onPress={() => {
                               setSelectedItem(item);
                               setBottomSheetVisible(true);
-                            }}>
+                            }}
+                          >
                             <Image
-                              source={require('../../assets/images/dots.png')}
+                              source={require("../../assets/images/dots.png")}
                               style={{
                                 height: RfH(12.54),
                                 width: RfW(3),
                                 top: RfH(5),
-                                resizeMode: 'contain',
-                                alignSelf: 'center',
+                                resizeMode: "contain",
+                                alignSelf: "center",
                               }}
                             />
                           </TouchableOpacity>
@@ -227,57 +251,85 @@ const Draft = ({navigation}) => {
                     <View>
                       <Text style={styles.msgtextsty}>{item.description}</Text>
                     </View>
-                    {item.banner_image && (
-                      <View
-                        style={{
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          marginVertical: RfH(5),
-                          width: RfW(315),
-                        }}
-                        onLayout={onLayout(item)}>
-                        <Image
-                          source={{
-                            uri: item.banner_image,
-                            cache: 'force-cache',
+                    {item.media && item.media.length > 0 && (
+                      <>
+                        <SwiperFlatList
+                          ref={swiperFlatListRef}
+                          data={item.media}
+                          autoplay={false}
+                          keyExtractor={(mediaItem) => mediaItem.id.toString()}
+                          renderItem={({ item: mediaItem }) => (
+                            <TouchableOpacity
+                              activeOpacity={0.8}
+                              onPress={() => openImageViewer(mediaItem.media)}
+                              style={{
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginVertical: RfH(5),
+                                overflow: "hidden",
+                                height: RfH(300),
+                                width: screenWidth - RfH(62),
+                              }}
+                            >
+                              <Image
+                                source={{
+                                  uri: mediaItem.media,
+                                  cache: "force-cache",
+                                }}
+                                resizeMode="contain"
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  backgroundColor: colors.LIGHT_GRAY,
+                                  marginTop: hp("0.1%"),
+                                  borderRadius: RfH(10),
+                                }}
+                              />
+                            </TouchableOpacity>
+                          )}
+                          contentContainerStyle={{ paddingHorizontal: 10 }}
+                          onMomentumScrollEnd={(e) => {
+                            const contentOffsetX =
+                              e?.nativeEvent?.contentOffset?.x;
+                            if (contentOffsetX !== undefined) {
+                              const newIndex = Math.round(
+                                contentOffsetX / screenWidth
+                              );
+                              setCurrentIndex(newIndex);
+                            }
                           }}
-                          style={[
-                            {
-                              width: '100%',
-                              height: imageSize?.height || RfH(50),
-                              resizeMode: 'cover',
-                              backgroundColor: colors.LIGHT_GRAY,
-                              marginTop: hp('0.1%'),
-                              borderRadius: RfH(10),
-                            },
-                            {width: imageSize?.width || screenWidth},
-                          ]}
                         />
-                      </View>
+                        <View style={styles.numcontainer}>
+                          <Text style={styles.numtxt}>
+                            {currentIndex + 1}/{item.media.length}
+                          </Text>
+                        </View>
+                      </>
                     )}
                     {item.video && (
                       <View
                         style={[
                           styles.tabVideo,
                           {
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            alignSelf: 'center',
+                            justifyContent: "center",
+                            alignItems: "center",
+                            alignSelf: "center",
                             backgroundColor: colors.shadwo_blue,
                             borderRadius: RfH(8),
                             marginVertical: RfH(10),
                             padding: RfH(8),
                           },
-                        ]}>
+                        ]}
+                      >
                         <Video
-                          source={{uri: item.video}}
+                          source={{ uri: item.video }}
                           paused={currentVideoIndex !== item.id || isPaused}
                           style={[
                             styles.video,
                             {
                               height: screenHeight * 0.5,
                               width: screenWidth * 0.8,
-                              alignSelf: 'center',
+                              alignSelf: "center",
                               left: RfW(0),
                               borderRadius: RfH(10),
                             },
@@ -294,12 +346,13 @@ const Draft = ({navigation}) => {
                             } else {
                               playVideo(item.id);
                             }
-                          }}>
+                          }}
+                        >
                           {currentVideoIndex === item.id && !isPaused ? (
-                            <Icon name={'pause'} size={32} color="#128C78" />
+                            <Icon name={"pause"} size={32} color="#128C78" />
                           ) : (
                             <Icon
-                              name={'play-arrow'}
+                              name={"play-arrow"}
                               size={32}
                               color="#128C78"
                             />
@@ -319,10 +372,11 @@ const Draft = ({navigation}) => {
               <View
                 style={{
                   flex: 1,
-                  justifyContent: 'center',
-                  alignSelf: 'center',
-                }}>
-                <Text style={{marginTop: '80%', color: colors.black}}>
+                  justifyContent: "center",
+                  alignSelf: "center",
+                }}
+              >
+                <Text style={{ marginTop: "80%", color: colors.black }}>
                   No draft posts available
                 </Text>
               </View>
@@ -338,29 +392,32 @@ const Draft = ({navigation}) => {
       <BottomSheet
         visible={bottomSheetVisible}
         onBackButtonPress={() => setBottomSheetVisible(false)}
-        onBackdropPress={() => setBottomSheetVisible(false)}>
+        onBackdropPress={() => setBottomSheetVisible(false)}
+      >
         <View
           style={{
-            backgroundColor: 'white',
+            backgroundColor: "white",
             padding: 20,
             borderTopRightRadius: RfH(20),
             borderTopLeftRadius: RfH(25),
             paddingVertical: RfH(20),
-          }}>
+          }}
+        >
           <View>
             <>
               <TouchableOpacity
-                style={[styles.bottombtncon, {marginVertical: RfH(10)}]}
-                onPress={updatePost}>
+                style={[styles.bottombtncon, { marginVertical: RfH(10) }]}
+                onPress={updatePost}
+              >
                 <View>
                   <Entypo
-                    name={'publish'}
+                    name={"publish"}
                     size={22}
                     color={colors.skyblue}
-                    style={{top: RfH(6)}}
+                    style={{ top: RfH(6) }}
                   />
                 </View>
-                <View style={{left: RfW(12)}}>
+                <View style={{ left: RfW(12) }}>
                   <Text style={styles.btntxt}>Post</Text>
                   <Text style={styles.disbtntxt}>
                     Are you sure want to publish this post
@@ -369,16 +426,17 @@ const Draft = ({navigation}) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.bottombtncon}
-                onPress={handleDeletePost}>
+                onPress={handleDeletePost}
+              >
                 <View>
                   <AntDesign
-                    name={'delete'}
+                    name={"delete"}
                     size={20}
                     color={colors.skyblue}
-                    style={{top: RfH(8)}}
+                    style={{ top: RfH(8) }}
                   />
                 </View>
-                <View style={{left: RfW(12)}}>
+                <View style={{ left: RfW(12) }}>
                   <Text style={styles.btntxt}>Delete</Text>
                   <Text style={styles.disbtntxt}>
                     This Post will be deleted permanently

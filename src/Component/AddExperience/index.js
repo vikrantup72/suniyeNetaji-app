@@ -43,7 +43,7 @@ const AddExperience = ({navigation, route}) => {
     setLoadings(true);
     try {
       const token = await getKey('AuthKey');
-      const url = `https://apis.suniyenetajee.com/api/v1/account/experience/${id}`;
+      const url = `https://stage.suniyenetajee.com/api/v1/account/experience/${id}`;
       const requestOptions = {
         method: 'GET',
         headers: {

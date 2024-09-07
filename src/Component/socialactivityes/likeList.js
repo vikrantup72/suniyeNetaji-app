@@ -35,7 +35,7 @@ const LikeList = ({route, navigation}) => {
           },
         };
         const response = await fetch(
-          `https://apis.suniyenetajee.com/api/v1/cms/post/like-list/${id}/`,
+          `https://stage.suniyenetajee.com/api/v1/cms/post/like-list/${id}/`,
           requestOptions,
         );
         if (response.ok) {
@@ -70,7 +70,7 @@ const LikeList = ({route, navigation}) => {
         {item.picture ? (
           <Image
             source={{
-              uri: `https://apis.suniyenetajee.com${item.picture}`,
+              uri: `https://stage.suniyenetajee.com${item.picture}`,
             }}
             style={{borderRadius: RfH(20), height: 40, width: 40}}
           />

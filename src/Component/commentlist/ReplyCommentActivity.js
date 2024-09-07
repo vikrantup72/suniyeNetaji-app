@@ -40,7 +40,7 @@ const ReplyCommentActivity = ({item, onDelete, onEdit}) => {
       setIsDeleting(true);
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment-reply/delete/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment-reply/delete/${id}/`,
         {
           method: 'DELETE',
           headers: {
@@ -69,7 +69,7 @@ const ReplyCommentActivity = ({item, onDelete, onEdit}) => {
       const action = !isLiked ? 'like' : 'dislike';
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment-reply/like-dislike/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment-reply/like-dislike/${id}/`,
         {
           method: 'POST',
           headers: {

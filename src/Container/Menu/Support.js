@@ -74,7 +74,7 @@ const Support = ({navigation}) => {
       };
 
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/support/message/',
+        'https://stage.suniyenetajee.com/api/v1/support/message/',
         requestOptions,
       );
 

@@ -33,7 +33,7 @@ const SearchScreen = ({navigation}) => {
         },
       };
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/polling/get-polling/',
+        'https://stage.suniyenetajee.com/api/v1/polling/get-polling/',
         requestOptions,
       );
       if (response.ok) {
@@ -79,7 +79,7 @@ const SearchScreen = ({navigation}) => {
         }),
       };
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/polling/${pollId}/vote/`,
+        `https://stage.suniyenetajee.com/api/v1/polling/${pollId}/vote/`,
         requestOptions,
       );
       if (response.ok) {

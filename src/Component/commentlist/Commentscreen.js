@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState, useRef} from 'react';
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -11,26 +11,35 @@ import {
   Pressable,
   SafeAreaView,
   Keyboard,
-} from 'react-native';
-import {RfH, RfW, getKey, getUserId, hp} from '../../utils/helper';
-import {colors} from '../../utils';
-import styles from './styles';
-import SocialActivityes from '../socialactivityes/SocialActivityes';
-import Header from '../../utils/Header';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import Replyandlikecomment from './Replyandlikecomment';
-import Video from 'react-native-video';
-import DeleteCamment from './DeleteCamment';
-import {useDispatch, useSelector} from 'react-redux';
-import {createComment, updateComment} from '../../redux/Comment';
-import ReplyBottomSheet from './ReplyBottosheet';
+} from "react-native";
+import { RfH, RfW, getKey, getUserId, hp } from "../../utils/helper";
+import { colors } from "../../utils";
+import styles from "./styles";
+import SocialActivityes from "../socialactivityes/SocialActivityes";
+import Header from "../../utils/Header";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import Replyandlikecomment from "./Replyandlikecomment";
+import Video from "react-native-video";
+import DeleteCamment from "./DeleteCamment";
+import { useDispatch, useSelector } from "react-redux";
+import { createComment, updateComment } from "../../redux/Comment";
+import ReplyBottomSheet from "./ReplyBottosheet";
+import SwiperFlatList from "react-native-swiper-flatlist";
 
-const Commentscreen = ({route}) => {
-  const {item, discription} = route.params || {};
-  const {mainDataSource} = useSelector(state => state.dataSource);
-  const [comment, setComment] = useState('');
+const Commentscreen = ({ route }) => {
+  const { item } = route.params || {};
+  const { postId } = route.params || {};
+  const id = item;
+  console.log(postId, "postIdgggg");
+  const swiperFlatListRef = useRef(null);
+
+  useEffect(() => {
+    console.log(id, "postId");
+  }, [id, postId]);
+  const { mainDataSource } = useSelector((state) => state.dataSource);
+  const [comment, setComment] = useState("");
   const [data, setData] = useState([]);
-  console.log(data,"comments");
+  console.log(data, "comments");
   const [loading, setLoading] = useState(false);
   const [replyVisible, setReplyVisible] = useState(false);
   const [isCurrentVideo, setIsCurrentVideo] = useState(false);
@@ -39,6 +48,30 @@ const Commentscreen = ({route}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editCommentId, setEditCommentId] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [postdata, setPostData] = useState();
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    const visibleVideo = viewableItems.find((item) => item.item.video);
+    if (visibleVideo) {
+      setCurrentVideoIndex(visibleVideo.index);
+      setIsPaused(false);
+    } else {
+      setIsPaused(true);
+    }
+  }).current;
+
+  const playVideo = (index) => {
+    setCurrentVideoIndex(index);
+    setIsPaused(false);
+  };
+
+  const handlePause = () => {
+    setIsPaused(!isPaused);
+  };
+
+  console.log(postdata, "postdata");
+
   const inputRef = useRef(null);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -47,16 +80,52 @@ const Commentscreen = ({route}) => {
   }, []);
 
   useEffect(() => {
+    fetchPostbyId();
+  }, []);
+
+  const identifier = id || postId;
+  console.log(identifier, "identifierggg");
+
+  const fetchPostbyId = async () => {
+    try {
+      let token = await getKey("AuthKey");
+      token = token.trim();
+      const response = await fetch(
+        `https://stage.suniyenetajee.com/api/v1/cms/post/${identifier}`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Token ${token}`,
+          },
+        }
+      );
+      console.log(response, "response==>");
+      if (response.ok) {
+        const res = await response.json();
+        console.log(res, "hbjb");
+        setPostData(res);
+        // setLoader(false);
+      } else {
+        // setLoader(false);
+      }
+    } catch (error) {
+      // setLoader(false);
+      console.error("Error fetching reply data:");
+    }
+  };
+
+  useEffect(() => {
     getUserId("comment")
-      .then(userId => {
+      .then((userId) => {
         setUserId(userId);
       })
-      .catch(error => {
-        console.error('Error getting user ID:', error);
+      .catch((error) => {
+        console.error("Error getting user ID:", error);
       });
   }, [dispatch]);
 
-  const openReplySheet = comment => {
+  const openReplySheet = (comment) => {
     setSelectedComment(comment);
     setReplyVisible(true);
   };
@@ -66,16 +135,16 @@ const Commentscreen = ({route}) => {
     setReplyVisible(false);
   };
 
-  const deleteComment = id => {
-    setData(data.filter(comment => comment.id !== id));
+  const deleteComment = (id) => {
+    setData(data.filter((comment) => comment.id !== id));
   };
 
   const [imageWidth, setImageWidth] = useState(0);
   const [imageHeight, setImageHeight] = useState(0);
 
-  const onLayout = useCallback(async e => {
+  const onLayout = useCallback(async (e) => {
     const containerWidth = e.nativeEvent?.layout?.width;
-    Image.getSize(discription.banner_image, (width, height) => {
+    Image.getSize(postdata.banner_image, (width, height) => {
       const imageAspectRatio = width / height;
       const imageHeight = containerWidth / imageAspectRatio;
       setImageWidth(containerWidth);
@@ -83,7 +152,7 @@ const Commentscreen = ({route}) => {
     });
   }, []);
 
-  const handleCommentChange = text => {
+  const handleCommentChange = (text) => {
     setComment(text);
   };
 
@@ -92,46 +161,46 @@ const Commentscreen = ({route}) => {
     try {
       setButtonDisabled(true);
       if (isEditing) {
-        await dispatch(updateComment({id: editCommentId, comment})).unwrap();
+        await dispatch(updateComment({ id: editCommentId, comment })).unwrap();
         setIsEditing(false);
         setEditCommentId(null);
       } else {
-        await dispatch(createComment({comment, item})).unwrap();
+        await dispatch(createComment({ comment, item })).unwrap();
       }
-      setComment('');
+      setComment("");
       getComment(item);
       inputRef.current.blur();
     } catch (error) {
-      console.error('Error handling comment:', error);
+      console.error("Error handling comment:", error);
     } finally {
       setButtonDisabled(false);
     }
   };
 
-  const getComment = async id => {
+  const getComment = async (id) => {
     // setLoading(true);
     try {
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const requestOptions = {
-        method: 'GET',
+        method: "GET",
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+          Accept: "application/json",
+          "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
       };
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/cms/comment/post/${id}/`,
-        requestOptions,
+        `https://stage.suniyenetajee.com/api/v1/cms/comment/post/${id}/`,
+        requestOptions
       );
       if (response.ok) {
         const responseData = await response.json();
         setData(responseData);
       } else {
-        console.error('Error response:', response.status, response.statusText);
+        console.error("Error response:", response.status, response.statusText);
       }
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -154,8 +223,8 @@ const Commentscreen = ({route}) => {
     }
   }, [isEditing]);
 
-  const screenHeight = Dimensions.get('window').height;
-  const screenWidth = Dimensions.get('window').width;
+  const screenHeight = Dimensions.get("window").height;
+  const screenWidth = Dimensions.get("window").width;
 
   const [isVisibleModal, setVisibleModal] = useState(false);
   const [viewAllData, setViewAllData] = useState();
@@ -180,112 +249,151 @@ const Commentscreen = ({route}) => {
             borderRadius: RfH(10),
             borderColor: colors.LIGHT_BLACK,
             paddingBottom: RfW(10),
-          }}>
+          }}
+        >
           <View
             style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}>
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
             <View style={styles.postcontainer}>
               <View style={styles.imgcontainer}>
                 <Image
                   source={{
-                    uri: `https://apis.suniyenetajee.com/${mainDataSource[item]?.created_by?.picture}`,
+                    uri: `https://stage.suniyenetajee.com/${postdata?.created_by?.picture}`,
                   }}
                   style={{
                     height: RfH(34),
                     width: RfW(34),
                     borderRadius: RfH(20),
-                    alignSelf: 'center',
-                    resizeMode: 'cover',
+                    alignSelf: "center",
+                    resizeMode: "cover",
                   }}
                 />
               </View>
               <View>
                 <Text style={styles.namesty}>
-                  {discription?.created_by?.full_name?.length > 15
-                    ? `${mainDataSource[item].created_by.full_name.slice(
-                        0,
-                        15,
-                      )}...`
-                    : mainDataSource[item].created_by.full_name}
+                  {postdata?.created_by?.full_name?.length > 15
+                    ? `${postdata?.created_by?.full_name.slice(0, 15)}...`
+                    : postdata?.created_by?.full_name}
                 </Text>
-                <Text style={styles.timesty}>
-                  {mainDataSource[item]?.created_date}
-                </Text>
+                <Text style={styles.timesty}>{postdata?.created_date}</Text>
               </View>
             </View>
             <View style={styles.followcontainer}></View>
           </View>
           <View>
-            <Text style={styles.msgtextsty}>
-              {mainDataSource[item]?.description}
-            </Text>
+            <Text style={styles.msgtextsty}>{postdata?.description}</Text>
           </View>
           <View>
             {/* Banner Image */}
-            {mainDataSource[item]?.banner_image && (
-              <View
-                style={{
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  marginVertical: RfH(5),
-                }}
-                onLayout={onLayout}>
-                <Image
-                  source={{
-                    uri: mainDataSource[item]?.banner_image,
-                    cache: 'force-cache',
+            {postdata?.media?.length > 0 && (
+              <>
+                <SwiperFlatList
+                  ref={swiperFlatListRef}
+                  data={postdata.media}
+                  autoplay={false}
+                  keyExtractor={(mediaItem) => mediaItem.id.toString()}
+                  renderItem={({ item: mediaItem }) => (
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => openImageViewer(mediaItem.media)}
+                      style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginVertical: RfH(5),
+                        overflow: "hidden",
+                        height: RfH(300),
+                        width: screenWidth - RfH(62),
+                        right: 5,
+                      }}
+                    >
+                      <Image
+                        source={{
+                          uri: mediaItem.media,
+                          cache: "force-cache",
+                        }}
+                        resizeMode="contain"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          backgroundColor: colors.LIGHT_GRAY,
+                          marginTop: hp("0.1%"),
+                          borderRadius: RfH(15),
+                          //  right:10
+                        }}
+                      />
+                    </TouchableOpacity>
+                  )}
+                  // contentContainerStyle={{ paddingHorizontal: 10 }}
+                  onMomentumScrollEnd={(e) => {
+                    const contentOffsetX = e?.nativeEvent?.contentOffset?.x;
+                    if (contentOffsetX !== undefined) {
+                      const newIndex = Math.round(
+                        contentOffsetX / (screenWidth - RfH(62))
+                      );
+                      setCurrentIndex(newIndex);
+                    }
                   }}
-                  style={[
-                    {
-                      width: '100%',
-                      height: imageHeight,
-                      resizeMode: 'cover',
-                      backgroundColor: colors.LIGHT_GRAY,
-                      marginTop: hp('0.1%'),
-                      borderRadius: RfH(10),
-                    },
-                    {width: imageWidth},
-                  ]}
                 />
-              </View>
+                {postdata.media.length > 1 && (
+                  <View style={styles.imageindexsty}>
+                    <Text style={styles.indextxtsty}>
+                      {currentIndex + 1}/{postdata.media.length}
+                    </Text>
+                  </View>
+                )}
+              </>
             )}
 
             {/* Video */}
-            {mainDataSource[item]?.video && (
-              <View style={styles.tabVideo}>
+            {postdata?.video && (
+              <View
+                style={[
+                  styles.tabVideo,
+                  {
+                    justifyContent: "center",
+                    alignItems: "center",
+                    alignSelf: "center",
+                    backgroundColor: colors.shadwo_blue,
+                    borderRadius: RfH(8),
+                    marginVertical: RfH(10),
+                    padding: RfH(8),
+                  },
+                ]}
+              >
                 <Video
-                  source={{uri: [item]?.video}}
-                  paused={!isCurrentVideo || isPaused}
+                  source={{ uri: postdata.video }}
+                  paused={currentVideoIndex !== postdata.id || isPaused}
                   style={[
                     styles.video,
                     {
-                      height: screenHeight * 0.4,
+                      height: screenHeight * 0.5,
                       width: screenWidth * 0.8,
-                      alignSelf: 'center',
+                      alignSelf: "center",
                       left: RfW(0),
                       borderRadius: RfH(10),
                     },
                   ]}
                   resizeMode="cover"
+                  repeat={true}
                 />
-                {/* Play/Pause button */}
                 <TouchableOpacity
                   activeOpacity={0.9}
                   style={styles.playButton}
                   onPress={() => {
-                    if (isCurrentVideo) {
-                      setIsPaused(!isPaused);
+                    if (currentVideoIndex === postdata.id) {
+                      handlePause();
                     } else {
-                      setIsCurrentVideo(true);
-                      setIsPaused(false);
+                      playVideo(postdata.id);
                     }
-                  }}>
-                  {isCurrentVideo && !isPaused ? (
-                    <Icon name={'pause'} size={32} color="#128C78" />
+                  }}
+                >
+                  {currentVideoIndex === postdata.id && !isPaused ? (
+                    <Icon name={"pause"} size={32} color="#128C78" />
                   ) : (
-                    <Icon name={'play-arrow'} size={32} color="#128C78" />
+                    <Icon name={"play-arrow"} size={32} color="#128C78" />
                   )}
                 </TouchableOpacity>
               </View>
@@ -293,13 +401,13 @@ const Commentscreen = ({route}) => {
           </View>
           <View>
             <SocialActivityes
-              Commentimg={require('../../assets/images/comment.png')}
+              Commentimg={require("../../assets/images/comment.png")}
               item={mainDataSource[item]}
             />
           </View>
         </View>
         {item > 0 ? (
-          <View style={{marginVertical: RfH(10)}}>
+          <View style={{ marginVertical: RfH(10) }}>
             <Text style={styles.nametxtsty}>Comments..</Text>
           </View>
         ) : (
@@ -310,21 +418,22 @@ const Commentscreen = ({route}) => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View>
-        <Header HeaderTxt={'Comment'} />
+        <Header HeaderTxt={"Commentnnn"} />
       </View>
       <View
         style={{
           paddingVertical: RfH(5),
           paddingHorizontal: RfW(20),
-          marginBottom: '30%',
-        }}>
+          marginBottom: "30%",
+        }}
+      >
         <FlatList
           data={data}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={ListHeaderItem}
-          renderItem={({item, index}) => {
+          renderItem={({ item, index }) => {
             const isLastItem = index === data.length - 1;
             return (
               <View
@@ -332,22 +441,23 @@ const Commentscreen = ({route}) => {
                   flex: 1,
                   paddingBottom: RfH(10),
                   marginBottom: isLastItem ? 15 : 0,
-                }}>
+                }}
+              >
                 {loading ? (
-                  <ActivityIndicator size={'small'} color={colors.skyblue} />
+                  <ActivityIndicator size={"small"} color={colors.skyblue} />
                 ) : (
-                  <View style={{flexDirection: 'row'}}>
+                  <View style={{ flexDirection: "row" }}>
                     <View style={styles.imgcontainer}>
                       <Image
                         source={{
-                          uri: `https://apis.suniyenetajee.com/${item?.created_by?.picture}`,
+                          uri: `https://stage.suniyenetajee.com/${item?.created_by?.picture}`,
                         }}
                         style={{
                           height: RfH(34),
                           width: RfW(34),
                           borderRadius: RfH(20),
-                          alignSelf: 'center',
-                          resizeMode: 'cover',
+                          alignSelf: "center",
+                          resizeMode: "cover",
                         }}
                       />
                     </View>
@@ -355,9 +465,10 @@ const Commentscreen = ({route}) => {
                       <View
                         style={{
                           paddingVertical: RfH(5),
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                        }}>
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
                         <View>
                           <Text style={styles.nametxtsty}>
                             {item?.created_by?.full_name?.length > 15
@@ -365,28 +476,32 @@ const Commentscreen = ({route}) => {
                               : item.created_by.full_name}
                           </Text>
                         </View>
-                        {console.log(userId,'userIdvvn')}
-                        {console.log(item?.created_by?.user_id,'userIdvvnvhhnvn')}
+                        {console.log(userId, "userIdvvn")}
+                        {console.log(
+                          item?.created_by?.user_id,
+                          "userIdvvnvhhnvn"
+                        )}
 
                         {userId == item?.created_by?.user_id && (
                           <TouchableOpacity
                             onPress={() => openReplySheet(item)}
-                            style={{width: RfW(25)}}>
+                            style={{ width: RfW(25) }}
+                          >
                             <Image
-                              source={require('../../assets/images/dots.png')}
+                              source={require("../../assets/images/dots.png")}
                               style={{
                                 height: RfH(12.54),
                                 width: RfW(3),
                                 top: RfH(5),
                                 left: RfW(3),
-                                resizeMode: 'contain',
-                                alignSelf: 'center',
+                                resizeMode: "contain",
+                                alignSelf: "center",
                               }}
                             />
                           </TouchableOpacity>
                         )}
                       </View>
-                      <View style={{bottom: RfH(6), width: '98%'}}>
+                      <View style={{ bottom: RfH(6), width: "98%" }}>
                         <Text style={styles.msgtxtsty}>{item?.comment}</Text>
                         <View>
                           <Replyandlikecomment
@@ -402,13 +517,13 @@ const Commentscreen = ({route}) => {
             );
           }}
           ListEmptyComponent={() => (
-            <View style={{alignItems: 'center', marginTop: 20}}>
+            <View style={{ alignItems: "center", marginTop: 20 }}>
               {loading && (
-                <ActivityIndicator size={'small'} color={colors.skyblue} />
+                <ActivityIndicator size={"small"} color={colors.skyblue} />
               )}
             </View>
           )}
-          keyExtractor={item => item.id.toString()}
+          keyExtractor={(item) => item.id.toString()}
         />
         <ReplyBottomSheet
           isVisible={isVisibleModal}
@@ -419,15 +534,16 @@ const Commentscreen = ({route}) => {
       {/* Bottom Input */}
       <View
         style={{
-          position: 'absolute',
+          position: "absolute",
           bottom: RfH(0),
-          alignSelf: 'center',
-          flexDirection: 'row',
+          alignSelf: "center",
+          flexDirection: "row",
           backgroundColor: colors.WHITE,
           paddingVertical: RfH(5),
           borderTopWidth: 1,
           borderTopColor: colors.GRAY,
-        }}>
+        }}
+      >
         <View style={styles.inputcontainer}>
           <TextInput
             placeholder="Write Comment Here....."
@@ -444,10 +560,11 @@ const Commentscreen = ({route}) => {
           onPress={comment && !buttonDisabled ? handleSubmit : null}
           style={[
             styles.postbtnsty,
-            {opacity: comment && !buttonDisabled ? 1 : 0.5},
+            { opacity: comment && !buttonDisabled ? 1 : 0.5 },
           ]}
-          disabled={buttonDisabled}>
-          <Text style={styles.posttxt}>{isEditing ? 'Edit' : 'Post'}</Text>
+          disabled={buttonDisabled}
+        >
+          <Text style={styles.posttxt}>{isEditing ? "Edit" : "Post"}</Text>
         </Pressable>
       </View>
 

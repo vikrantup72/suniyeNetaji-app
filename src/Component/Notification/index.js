@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   SafeAreaView,
@@ -8,45 +8,53 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-} from 'react-native';
-import {colors} from '../../utils';
-import {RfH, RfW, getKey} from '../../utils/helper';
-import Header from '../../utils/Header';
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import {useDispatch, useSelector} from 'react-redux';
-import {toggleAcceptStatus, toggleDeclineStatus} from '../../redux/FollowSlice';
-import {useNavigation} from '@react-navigation/native';
+} from "react-native";
+import { colors } from "../../utils";
+import { RfH, RfW, getKey } from "../../utils/helper";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import { useDispatch } from "react-redux";
+import { toggleAcceptStatus } from "../../redux/FollowSlice";
+import { useNavigation } from "@react-navigation/native";
+import { useAndroidBackHandler } from "react-navigation-backhandler";
 
 const Notification = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [datas, setDatas] = useState([]);
+  console.log(datas);
 
+  useAndroidBackHandler(() => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+      return true;
+    }
+    return false; // Let the system handle the back button event
+  });
   const FollowRequest = async () => {
     setLoading(true);
     try {
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const requestOptions = {
-        method: 'GET',
+        method: "GET",
         headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
+          Accept: "application/json",
+          "Content-Type": "application/json",
           Authorization: `Token ${token}`,
         },
       };
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/follow-unfollow/?type=pending_request',
-        requestOptions,
+        "https://stage.suniyenetajee.com/api/v1/account/follow-unfollow/?type=pending_request",
+        requestOptions
       );
       if (response.ok) {
         const responseData = await response.json();
         setDatas(responseData.results[0].pending_request);
       } else {
-        console.error('Error response:', response.status, response.statusText);
+        console.error("Error response:", response.status, response.statusText);
       }
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -56,58 +64,57 @@ const Notification = () => {
     FollowRequest();
   }, []);
 
-  // const handleDeclineTogg= async id => {
-  //   try {
-  //     await dispatch(toggleDeclineStatus({id})).unwrap();
-  //     setDatas(prevDatas => prevDatas.filter(data => data.id !== id));
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
   const handleDeclineToggle = async (id) => {
-    console.log('Attempting to remove follower with ID:', id);
-    const url = 'https://apis.suniyenetajee.com/api/v1/account/follow-unfollow/';
-    console.log('URL:', url);
+    console.log("Attempting to remove follower with ID:", id);
+    const url =
+      "https://stage.suniyenetajee.com/api/v1/account/follow-unfollow/";
+    console.log("URL:", url);
     try {
-      const token = await getKey('AuthKey');
+      const token = await getKey("AuthKey");
       const formData = new FormData();
-      formData.append('id', id);
-      formData.append('type', 'decline');
-      
+      formData.append("id", id);
+      formData.append("type", "decline");
+
       const response = await fetch(url, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          Accept: 'application/json',
+          Accept: "application/json",
           Authorization: `Token ${token}`,
         },
         body: formData,
       });
-  
+
       if (response.ok) {
         const result = await response.json();
-        setDatas((prevDatas) => prevDatas.filter((data) => data.id !== id));
+        setDatas((prevDatas) =>
+          prevDatas.map((data) =>
+            data.id === id ? { ...data, accepted: false, declined: true } : data
+          )
+        );
         ToastAndroid.show(result?.Message, ToastAndroid.BOTTOM);
-        console.log('Follower declined successfully');
+        console.log("Follower declined successfully");
       } else {
         const responseBody = await response.text();
         console.error(
-          'Error response:',
+          "Error response:",
           response.status,
           response.statusText,
           responseBody
         );
       }
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error("Fetch error:", error);
     }
   };
-  
 
-  const handleAcceptToggle = async id => {
+  const handleAcceptToggle = async (id) => {
     try {
-      await dispatch(toggleAcceptStatus({id})).unwrap();
-      setDatas(prevDatas => prevDatas.filter(data => data.id !== id));
+      await dispatch(toggleAcceptStatus({ id })).unwrap();
+      setDatas((prevDatas) =>
+        prevDatas.map((data) =>
+          data.id === id ? { ...data, accepted: true } : data
+        )
+      );
     } catch (error) {
       console.error(error);
     }
@@ -135,17 +142,19 @@ const Notification = () => {
     <SafeAreaView style={styles.container}>
       <View
         style={{
-          flexDirection: 'row',
+          flexDirection: "row",
           paddingHorizontal: 10,
           paddingTop: RfH(15),
-        }}>
+        }}
+      >
         <TouchableOpacity
-          onPress={() => navigation.navigate('Home')}
-          style={styles.leftItem}>
+          onPress={() => navigation.navigate("Home")}
+          style={styles.leftItem}
+        >
           <AntDesign name="left" size={20} color={colors.black} />
         </TouchableOpacity>
         <View>
-          <Text style={styles.title}>Notification</Text>
+          <Text style={styles.title}>Pendding-Request</Text>
         </View>
       </View>
       {loading ? (
@@ -157,42 +166,43 @@ const Notification = () => {
           <View style={styles.container1}>
             <FlatList
               data={datas}
-              keyExtractor={item => item.id.toString()}
+              keyExtractor={(item) => item.id.toString()}
               ListEmptyComponent={renderNoRepliesMessage}
-              renderItem={({item}) => {
+              renderItem={({ item }) => {
                 return (
                   <View style={styles.flatlistcontainer}>
                     <View
-                      style={{justifyContent: 'center', flexDirection: 'row'}}>
+                      style={{ justifyContent: "center", flexDirection: "row" }}
+                    >
                       <View style={styles.imgcontainer}>
                         {item?.picture ? (
                           <Image
                             source={{
-                              uri: `https://apis.suniyenetajee.com${item?.picture}`,
+                              uri: `https://stage.suniyenetajee.com${item?.picture}`,
                             }}
                             style={{
                               height: RfH(34),
                               width: RfW(34),
                               borderRadius: RfH(16),
-                              alignSelf: 'center',
-                              resizeMode: 'cover',
+                              alignSelf: "center",
+                              resizeMode: "cover",
                             }}
                           />
                         ) : (
                           <Image
-                            source={require('../../assets/images/dummyplaceholder.png')}
+                            source={require("../../assets/images/dummyplaceholder.png")}
                             style={{
                               height: RfH(30),
                               width: RfW(30),
                               borderRadius: RfH(16),
-                              alignSelf: 'center',
-                              resizeMode: 'cover',
+                              alignSelf: "center",
+                              resizeMode: "cover",
                             }}
                           />
                         )}
                       </View>
                       <View style={styles.msgcontainer}>
-                        <View style={{flexDirection: 'row'}}>
+                        <View style={{ flexDirection: "row" }}>
                           <Text style={styles.namesty}>
                             {item?.full_name?.length > 16
                               ? `${item.full_name.slice(0, 16)}...`
@@ -201,32 +211,40 @@ const Notification = () => {
                         </View>
                         <View>
                           <Text style={styles.msgsty}>
-                            started following you
+                            {item.accepted || item.declined
+                              ? "sent you a request"
+                              : "started following you"}
                           </Text>
                         </View>
                       </View>
                     </View>
-                    <View style={{flexDirection: 'row'}}>
-                      <TouchableOpacity
-                        style={[styles.checkbtnsty, {right: RfW(15)}]}
-                        onPress={() => handleAcceptToggle(item.id)}>
-                        <AntDesign
-                          name={'check'}
-                          size={15}
-                          color={colors.skyblue}
-                          style={{alignSelf: 'center'}}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.checkbtnsty}
-                        onPress={() => handleDeclineToggle(item.id)}>
-                        <AntDesign
-                          name={'close'}
-                          size={15}
-                          color={colors.skyblue}
-                          style={{alignSelf: 'center'}}
-                        />
-                      </TouchableOpacity>
+                    <View style={{ flexDirection: "row" }}>
+                      {!item.accepted && !item.declined && (
+                        <>
+                          <TouchableOpacity
+                            style={[styles.checkbtnsty, { right: RfW(15) }]}
+                            onPress={() => handleAcceptToggle(item.id)}
+                          >
+                            <AntDesign
+                              name={"check"}
+                              size={15}
+                              color={colors.skyblue}
+                              style={{ alignSelf: "center" }}
+                            />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={styles.checkbtnsty}
+                            onPress={() => handleDeclineToggle(item.id)}
+                          >
+                            <AntDesign
+                              name={"close"}
+                              size={15}
+                              color={colors.skyblue}
+                              style={{ alignSelf: "center" }}
+                            />
+                          </TouchableOpacity>
+                        </>
+                      )}
                     </View>
                   </View>
                 );
@@ -249,8 +267,8 @@ const styles = StyleSheet.create({
   },
   loaderContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   container1: {
     paddingHorizontal: RfW(20),
@@ -260,38 +278,38 @@ const styles = StyleSheet.create({
     padding: RfH(5),
   },
   nodata: {
-    alignSelf: 'center',
-    marginTop: '90%',
+    alignSelf: "center",
+    marginTop: "95%",
   },
   separator: {
     height: 1,
-    width: '97%',
+    width: "97%",
     backgroundColor: colors.primary_black,
     opacity: 0.1,
   },
   title: {
     fontSize: 20,
     top: RfH(3),
-    fontWeight: '500',
+    fontWeight: "500",
     color: colors.black,
-    fontFamily: 'Poppins-Medium',
-    alignSelf: 'center',
-    position: 'absolute',
+    fontFamily: "Poppins-Medium",
+    alignSelf: "center",
+    position: "absolute",
     left: RfW(90),
   },
   flatlistcontainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginVertical: RfH(15),
-    width: '100%',
-    justifyContent: 'space-between',
+    width: "100%",
+    justifyContent: "space-between",
   },
   txtsty: {
     color: colors.black,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
   },
   msgcontainer: {
     paddingHorizontal: RfW(10),
-    justifyContent: 'center',
+    justifyContent: "center",
     bottom: RfH(5),
   },
   imgcontainer: {
@@ -299,28 +317,28 @@ const styles = StyleSheet.create({
     height: RfH(32),
     width: RfW(32),
     borderRadius: RfH(16),
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   namesty: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     lineHeight: 22.5,
     color: colors.primary_blue,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
   },
   msgsty: {
     fontSize: 15,
-    fontWeight: '400',
+    fontWeight: "400",
     lineHeight: 22.5,
     color: colors.black,
-    fontFamily: 'Poppins-Regular',
+    fontFamily: "Poppins-Regular",
   },
   checkbtnsty: {
     borderWidth: 1,
     height: RfH(35),
     width: RfW(35),
     borderRadius: RfH(20),
-    justifyContent: 'center',
+    justifyContent: "center",
     borderColor: colors.skyblue,
   },
 });

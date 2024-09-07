@@ -8,7 +8,7 @@ export const fetchExperienceData = createAsyncThunk(
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/experience/',
+        'https://stage.suniyenetajee.com/api/v1/account/experience/',
         {
           method: 'GET',
           headers: {
@@ -42,7 +42,7 @@ export const createExperience = createAsyncThunk(
       formData.append('currently_working', currently_working);
       const token = await getKey('AuthKey');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/experience/',
+        'https://stage.suniyenetajee.com/api/v1/account/experience/',
         {
           method: 'POST',
           headers: {
@@ -74,7 +74,7 @@ export const deleteExperience = createAsyncThunk(
     try {
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/account/experience/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/account/experience/${id}/`,
         {
           method: 'DELETE',
           headers: {
@@ -109,7 +109,7 @@ export const updateExperience = createAsyncThunk(
       formData.append('description', description);
       const token = await getKey('AuthKey');
       const response = await fetch(
-        `https://apis.suniyenetajee.com/api/v1/account/experience/${id}/`,
+        `https://stage.suniyenetajee.com/api/v1/account/experience/${id}/`,
         {
           method: 'PUT',
           headers: {

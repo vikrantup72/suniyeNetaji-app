@@ -11,7 +11,7 @@ export const ResetPassword = createAsyncThunk(
       formData.append('username', username);
       formData.append('type', 'forgot');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/otp-resend/',
+        'https://stage.suniyenetajee.com/api/v1/account/otp-resend/',
         {
           method: 'POST',
           headers: {
@@ -46,7 +46,7 @@ export const ChangePasswords = createAsyncThunk(
       formData.append('username', username);
       formData.append('type', 'forgot');
       const response = await fetch(
-        'https://apis.suniyenetajee.com/api/v1/account/change-password/',
+        'https://stage.suniyenetajee.com/api/v1/account/change-password/',
         {
           method: 'POST',
           headers: {
