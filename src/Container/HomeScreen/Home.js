@@ -19,7 +19,6 @@ import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import { fetchData } from "../../redux/PostReducer";
 import { RequestCount, fetchnearbyData } from "../../redux/SocialReducer";
 import { RfH, RfW } from "../../utils/helper";
-import mobileAds from "react-native-google-mobile-ads";
 import Header from "../../utils/Header";
 
 const Home = () => {
