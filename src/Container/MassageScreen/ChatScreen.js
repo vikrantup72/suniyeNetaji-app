@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
 	View,
 	Modal,
@@ -10,6 +10,7 @@ import {
 	Keyboard,
 	TextInput,
 	SafeAreaView,
+	Platform,
 } from "react-native";
 import { Bubble, GiftedChat, Send } from "react-native-gifted-chat";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
@@ -17,31 +18,55 @@ import DocumentPicker from "react-native-document-picker";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import GroupHeader from "./components/GroupHeader";
-import { SCREEN_HEIGHT } from "../../utils/helper";
+import { getKey, SCREEN_HEIGHT } from "../../utils/helper";
 import Video from "react-native-video";
 import { colors } from "../../utils";
+import { useDispatch, useSelector } from "react-redux";
+import { GroupList, Groupmsglisting } from "../../redux/ChatReducerSlice";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useAndroidBackHandler } from "react-navigation-backhandler";
+const ChatScreen = ({ route }) => {
+	const { item } = route?.params || [];
+	const navigation = useNavigation();
+	useAndroidBackHandler(() => {
+		if (navigation.canGoBack()) {
+			navigation.goBack();
+			return true;
+		}
+		return false;
+	});
+	const room_id = item?.room_id || item?.id;
 
-const ChatScreen = () => {
-	const [messages, setMessages] = useState([
-		{
-			_id: 1,
-			text: "Hello! How are you?",
-			createdAt: new Date(),
-			user: {
-				_id: 2,
-				name: "John Doe",
-			},
+	const dispatch = useDispatch();
+	const { datas } = useSelector((state) => state.profile);
+	const groupmassage = useSelector((state) => state.chat.groupmsg);
+	const groupData = useSelector((state) => state.chat.groupinfo);
+	const resultMessage = groupmassage?.results?.messages || [];
+	useFocusEffect(
+		useCallback(() => {
+			if (room_id && item?.room_type === "group") {
+				dispatch(Groupmsglisting(room_id));
+				if (room_id) {
+					console.log(room_id, "room_id");
+					dispatch(GroupList(room_id));
+				}
+			}
+		}, [room_id, item?.room_type, dispatch])
+	);
+
+	const formattedMessages = resultMessage.map((result) => ({
+		_id: result?.id,
+		text: result?.content,
+		image: result?.image || "",
+		video: result?.video || "",
+		createdAt: new Date(result.timestamp),
+		user: {
+			_id: result.sender == datas?.userid ? 1 : result.sender,
+			name: result.sender_full_name,
 		},
-		{
-			_id: 2,
-			text: "I'm good, thanks! What about you?",
-			createdAt: new Date(),
-			user: {
-				_id: 1,
-				name: "You",
-			},
-		},
-	]);
+	}));
+	const [messages, setMessages] = useState(formattedMessages);
+
 	const [previewVisible, setPreviewVisible] = useState(false);
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [selectedMedia, setSelectedMedia] = useState(null);
@@ -64,7 +89,7 @@ const ChatScreen = () => {
 		setModalVisible(false);
 		launchCamera({ mediaType: "photo" }, (response) => {
 			if (!response.didCancel && !response.errorCode) {
-				handleMediaUpload(response.assets[0].uri, "image");
+				handleMediaUpload(response.assets[0].uri, response.assets[0]?.type);
 			}
 		});
 	};
@@ -73,7 +98,7 @@ const ChatScreen = () => {
 		setModalVisible(false);
 		launchImageLibrary({ mediaType: "photo" }, (response) => {
 			if (!response.didCancel && !response.errorCode) {
-				handleMediaUpload(response.assets[0].uri, "image");
+				handleMediaUpload(response.assets[0].uri, response.assets[0]?.type);
 			}
 		});
 	};
@@ -101,7 +126,47 @@ const ChatScreen = () => {
 		togglePreview();
 	};
 
+	const uploadMediaWithText = async () => {
+		try {
+			const token = await getKey("AuthKey");
+			const formData = new FormData();
+			formData.append("file", {
+				uri:
+					Platform.OS === "android"
+						? selectedMedia.uri
+						: selectedMedia.uri.replace("file://", ""),
+				name: `media_${new Date().getTime()}`,
+				type: selectedMedia.type,
+			});
+
+			formData.append("file_type", "Image");
+			formData.append("chat_room_id", "2");
+			formData.append("content", selectedMedia?.text || "Hello");
+
+			// Do not manually set the Content-Type for multipart/form-data
+			const response = await fetch(
+				"https://stage.suniyenetajee.com/api/v1/chat/upload-media/",
+				{
+					method: "POST",
+					headers: {
+						Accept: "application/json",
+						"Content-Type": "multipart/form-data",
+						Authorization: `Token ${token}`,
+					},
+					body: formData,
+				}
+			);
+			if (!response.ok) {
+				throw new Error(`Server error: ${response.statusText}`);
+			}
+			const result = await response.json();
+		} catch (error) {
+			console.error("Error:", error.message);
+		}
+	};
+
 	const confirmSendMedia = () => {
+		uploadMediaWithText();
 		const newMessage = {
 			_id: Math.random().toString(36).substr(2, 9),
 			createdAt: new Date(),
@@ -113,6 +178,13 @@ const ChatScreen = () => {
 			image: selectedMedia?.type?.includes("image") ? selectedMedia.uri : null,
 			video: selectedMedia?.type?.includes("video") ? selectedMedia.uri : null,
 		};
+		const data = JSON.stringify({
+			action: "send_media_message",
+			message_id: 19,
+			file_url:
+				"https://stage.suniyenetajee.com/media/chat_images/Screenshot_2024-08-31_at_9.03.50PM.png",
+		});
+		socketRef.current.send(data);
 		setMessages((previousMessages) =>
 			GiftedChat.append(previousMessages, [newMessage])
 		);
@@ -120,12 +192,39 @@ const ChatScreen = () => {
 		togglePreview(); // Hide preview
 	};
 
-	const groupName = "React Native Devs";
-	const participants = 120;
-	const groupAvatar =
-		"https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg"; // Replace with your image URL
+	const socketRef = useRef(null);
+	useEffect(() => {
+		socketRef.current = new WebSocket(
+			"wss://stage.suniyenetajee.com/ws/chat/open"
+		);
 
-	// Customize message bubble background color
+		socketRef.current.onopen = () =>
+			console.log("WebSocket connection opened.");
+
+		socketRef.current.onmessage = (event) => {
+			const receivedMessage = JSON.parse(event.data);
+			console.log(receivedMessage, "receivedMessage");
+		};
+
+		socketRef.current.onclose = () =>
+			console.log("WebSocket connection closed.");
+
+		socketRef.current.onerror = (error) =>
+			console.error("WebSocket error:", error);
+
+		return () => {
+			if (
+				socketRef.current &&
+				socketRef.current.readyState === WebSocket.OPEN
+			) {
+				socketRef.current.close();
+			}
+		};
+	}, [room_id]);
+
+	const navigateToGroupDetails = () => {
+		navigation.navigate("GroupInfo", room_id);
+	};
 	const renderBubble = (props) => {
 		return (
 			<Bubble
@@ -180,9 +279,10 @@ const ChatScreen = () => {
 	return (
 		<View style={styles.container}>
 			<GroupHeader
-				groupName={groupName}
-				participants={participants}
-				groupAvatar={groupAvatar}
+				groupName={groupData?.name}
+				participants={groupData?.total_participants}
+				groupAvatar={groupData?.image}
+				onPress={navigateToGroupDetails}
 			/>
 			<GiftedChat
 				messages={messages}

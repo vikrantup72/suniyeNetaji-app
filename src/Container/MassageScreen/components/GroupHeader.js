@@ -5,7 +5,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import { colors } from "../../../utils";
 
-const GroupHeader = ({ groupName, participants, groupAvatar }) => {
+const GroupHeader = ({ groupName, participants, groupAvatar, onPress }) => {
 	const navigation = useNavigation();
 
 	return (
@@ -19,13 +19,16 @@ const GroupHeader = ({ groupName, participants, groupAvatar }) => {
 			</TouchableOpacity>
 
 			{/* Group avatar */}
-			<Image source={{ uri: groupAvatar }} style={styles.avatar} />
+			<Image
+				source={{ uri: "https://stage.suniyenetajee.com/" + groupAvatar }}
+				style={styles.avatar}
+			/>
 
 			{/* Group info (name + participants) */}
-			<View style={styles.groupInfo}>
+			<TouchableOpacity style={styles.groupInfo} onPress={onPress}>
 				<Text style={styles.groupName}>{groupName}</Text>
 				<Text style={styles.participants}>{participants} participants</Text>
-			</View>
+			</TouchableOpacity>
 
 			{/* Menu icon */}
 			<TouchableOpacity style={styles.menuButton}>

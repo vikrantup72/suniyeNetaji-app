@@ -84,7 +84,9 @@ const MassageScreen = () => {
 					>
 						<Text style={styles.namesty}>{item?.display_name}</Text>
 						{item?.last_message ? (
-							<Text style={styles.msgsty}>{item?.last_message.content}</Text>
+							<Text style={styles.msgsty}>
+								{item?.last_message.content || "Attached File 🗂️"}
+							</Text>
 						) : (
 							<Text style={styles.msgsty}>There is no message about this</Text>
 						)}
