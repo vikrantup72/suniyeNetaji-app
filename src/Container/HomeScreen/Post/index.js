@@ -301,34 +301,6 @@ const Post = () => {
 					/>
 				}
 				renderItem={({ item, index }) => {
-					// if ((index + 1) % 7 === 0) {
-					// 	return (
-					// 		<View
-					// 			style={{
-					// 				backgroundColor: "#fff",
-					// 				padding: 12,
-					// 				marginHorizontal: 20,
-					// 				borderRadius: 6,
-					// 				borderWidth: 1,
-					// 				borderColor: "#ddd",
-					// 				height: 300,
-					// 				alignItems: "center",
-					// 				marginBottom: 10,
-					// 			}}
-					// 		>
-					// 			<BannerAd
-					// 				size={BannerAdSize.MEDIUM_RECTANGLE}
-					// 				unitId={"ca-app-pub-8153576310820784/4730987154"}
-					// 				onAdLoaded={() => {
-					// 					console.log("Advert loaded");
-					// 				}}
-					// 				onAdFailedToLoad={(error) => {
-					// 					console.error("Advert failed to load: ", error);
-					// 				}}
-					// 			/>
-					// 		</View>
-					// 	);
-					// }
 					const data = mainDataSource[item];
 					return (
 						<View>
@@ -411,37 +383,6 @@ const Post = () => {
 								<View>
 									<Text style={styles.msgtextsty}>{data?.description}</Text>
 								</View>
-								{/* {data?.banner_image && (
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                      marginVertical: RfH(5),
-                      overflow: "hidden",
-                      height: RfH(300),
-                      width: screenWidth - RfH(62),
-                    }}
-                    onPress={() => openImageViewer(data?.banner_image)}
-                  >
-                    <Image
-                      source={{
-                        uri: data.banner_image,
-                        cache: "force-cache",
-                      }}
-                      resizeMode="contain"
-                      style={[
-                        {
-                          width: "100%",
-                          height: "100%",
-                          backgroundColor: colors.LIGHT_GRAY,
-                          marginTop: hp("0.1%"),
-                          borderRadius: RfH(10),
-                        },
-                      ]}
-                    />
-                  </TouchableOpacity>
-                )} */}
 
 								{data.media && data.media.length > 0 && (
 									<>
@@ -479,8 +420,7 @@ const Post = () => {
 													/>
 												</TouchableOpacity>
 											)}
-											// contentContainerStyle={{ paddingHorizontal: 10 }}
-											onMomentumScrollEnd={(e) => {
+											onScroll={(e) => {
 												const contentOffsetX = e?.nativeEvent?.contentOffset?.x;
 												if (contentOffsetX !== undefined) {
 													const newIndex = Math.round(
